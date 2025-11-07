@@ -19,8 +19,14 @@ export const convertSpinDirection = (direction: string): string => {
 };
 
 export const mapRawDataToPlayerData = (rawData: any): PlayerData => {
-  const parsedSpeed = parseFloat(rawData["速度(kph)"]?.trim());
-  const parsedSpin = parseInt(rawData["SPIN"]?.trim(), 10);
+  // Helper function to safely convert to string and trim
+  const safeToString = (value: any): string => {
+    if (value === null || value === undefined) return "";
+    return String(value);
+  };
+
+  const parsedSpeed = parseFloat(safeToString(rawData["速度(kph)"]));
+  const parsedSpin = parseInt(safeToString(rawData["SPIN"]), 10);
 
   if (isNaN(parsedSpeed)) {
     console.error('Invalid Speed Detected:', rawData["速度(kph)"]);
@@ -35,13 +41,13 @@ export const mapRawDataToPlayerData = (rawData: any): PlayerData => {
     date: rawData["日付"] || "unknown-date",
     speed: isNaN(parsedSpeed) ? 0 : parsedSpeed,
     spin: isNaN(parsedSpin) ? 0 : parsedSpin,
-    trueSpin: parseInt(rawData["TRUE SPIN"]?.trim(), 10) || 0,
-    spinEff: parseFloat(rawData["SPIN EFF."]?.replace("%", "").trim()) || 0,
+    trueSpin: parseInt(safeToString(rawData["TRUE SPIN"]), 10) || 0,
+    spinEff: parseFloat(safeToString(rawData["SPIN EFF."]).replace("%", "")) || 0,
     spinDirection: convertSpinDirection(rawData["SPIN DIRECTION"]),
-    verticalMovement: parseFloat(rawData["線の変化量(cm)"]?.trim()) || 0,
-    horizontalMovement: parseFloat(rawData["軸の変化量(cm)"]?.trim()) || 0,
+    verticalMovement: parseFloat(safeToString(rawData["線の変化量(cm)"])) || 0,
+    horizontalMovement: parseFloat(safeToString(rawData["軸の変化量(cm)"])) || 0,
     strike: rawData["ストライク"] === "はい" ? 1 : 0,
-    releasePoint: parseFloat(rawData["リリースポイントの高さ(m)"]?.trim()) || 0,
+    releasePoint: parseFloat(safeToString(rawData["リリースポイントの高さ(m)"])) || 0,
     absorption: rawData.absorption || "unknown",
   };
 };
