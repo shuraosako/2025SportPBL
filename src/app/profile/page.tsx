@@ -174,105 +174,123 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
     <>
       <Navigation showProfile={true} showHamburger={true} />
 
-      <div className="main-content">
-        <div className="RightContent">
-          <div className="profile-page">
-            <h1 className="profile-title">{t("profile.title")}</h1>
+      <div className="profile-container">
+        {isLoading && <div className="loading-spinner">{t("profile.saving")}</div>}
 
-            {isLoading && <div className="loading-spinner">{t("profile.saving")}</div>}
+        <div className="profile-header">
+          <h1 className="profile-title">{t("profile.title")}</h1>
+        </div>
 
-            <div className="profile-section">
-              {currentImageURL && (
-                <div className="profile-current-image">
+        <div className="profile-content">
+          {/* Left Column - Profile Image */}
+          <div className="profile-sidebar">
+            <div className="profile-image-card">
+              <div className="profile-image-wrapper">
+                {(currentImageURL || previewImage) ? (
                   <Image
-                    src={currentImageURL}
-                    alt="Current Profile"
-                    className="profile-image-preview"
+                    src={previewImage || currentImageURL || ''}
+                    alt="Profile"
+                    className="profile-avatar"
                     width={200}
                     height={200}
                   />
+                ) : (
+                  <div className="profile-avatar-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="avatar-icon">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                    </svg>
+                  </div>
+                )}
+              </div>
+              <div className="image-upload-section">
+                <label className="upload-button">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="file-input-hidden"
+                    onChange={handleImageChange}
+                  />
+                  {t("profile.uploadPhoto")}
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column - Profile Information */}
+          <div className="profile-main">
+            <div className="profile-card">
+              <h2 className="section-title">アカウント情報</h2>
+
+              <div className="form-group">
+                <label className="form-label">{t("profile.newUsername")}</label>
+                <input
+                  type="text"
+                  className="form-input"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  placeholder="ユーザー名を入力"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{t("profile.newPassword")}</label>
+                <input
+                  type="password"
+                  className="form-input"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="新しいパスワード (6文字以上)"
+                />
+              </div>
+            </div>
+
+            <div className="profile-card">
+              <h2 className="section-title">電話番号認証</h2>
+
+              <div className="form-group">
+                <label className="form-label">{t("profile.phoneNumber")}</label>
+                <div className="input-button-group">
+                  <input
+                    type="tel"
+                    className="form-input"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+81 90-1234-5678"
+                  />
+                  <button className="btn-secondary" onClick={handlePhoneNumberSignIn}>
+                    {t("profile.sendOTP")}
+                  </button>
+                </div>
+              </div>
+
+              {verificationId && (
+                <div className="form-group">
+                  <label className="form-label">{t("profile.otp")}</label>
+                  <div className="input-button-group">
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      placeholder="認証コードを入力"
+                    />
+                    <button className="btn-secondary" onClick={handleVerifyOtp}>
+                      {t("profile.verifyOTP")}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className="profile-section">
-              <label className="profile-label">{t("profile.phoneNumber")}:</label>
-              <input
-                type="tel"
-                className="profile-input"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="+1234567890"
-              />
-              <button className="profile-button" onClick={handlePhoneNumberSignIn}>
-                {t("profile.sendOTP")}
-              </button>
-            </div>
-
-            {verificationId && (
-              <div className="profile-section">
-                <label className="profile-label">{t("profile.otp")}:</label>
-                <input
-                  type="text"
-                  className="profile-input"
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  placeholder="Enter OTP"
-                />
-                <button className="profile-button" onClick={handleVerifyOtp}>
-                  {t("profile.verifyOTP")}
-                </button>
-              </div>
-            )}
-
-            <div className="profile-section">
-              <label className="profile-label">{t("profile.newPassword")}:</label>
-              <input
-                type="password"
-                className="profile-input"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-            </div>
-
-            <div className="profile-section">
-              <label className="profile-label">{t("profile.newUsername")}:</label>
-              <input
-                type="text"
-                className="profile-input"
-                value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
-              />
-            </div>
-
-            <div className="profile-section">
-              <label className="profile-label">{t("profile.uploadPhoto")}:</label>
-              {previewImage && (
-                <Image
-                  src={previewImage}
-                  alt="Profile Preview"
-                  className="profile-image-preview"
-                  width={200}
-                  height={200}
-                />
-              )}
-              <input
-                type="file"
-                accept="image/*"
-                className="profile-input-file"
-                onChange={handleImageChange}
-              />
-            </div>
-
-            <div className="profile-section">
-              <button className="profile-button" onClick={handleSaveChanges} disabled={isLoading}>
+            <div className="save-button-container">
+              <button className="btn-primary" onClick={handleSaveChanges} disabled={isLoading}>
                 {t("profile.saveChanges")}
               </button>
             </div>
-
-            <div id="recaptcha-container"></div>
           </div>
         </div>
+
+        <div id="recaptcha-container"></div>
       </div>
     </>
   );

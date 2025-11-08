@@ -74,32 +74,37 @@ function DataTableContent() {
    <>
      <Navigation showProfile={true} showHamburger={true} />
      <div className={styles.container}>
-       <h1 className={styles.heading}>{t("dataTable.title")}</h1>
-     <div className={styles.tableContainer}>
-       <table className={styles.table}>
-         <thead>
-           <tr>
-             {headers.map((key) => (
-               <th key={key}>{key}</th>
-             ))}
-           </tr>
-         </thead>
-         <tbody>
-           {normalizedData.map((row, index) => (
-             <tr key={index}>
+       <div className={styles.header}>
+         <h1 className={styles.heading}>{t("dataTable.title")}</h1>
+         <div className={styles.info}>
+           <span className={styles.recordCount}>{t("player.totalRecords")}: {uploadedData.length}</span>
+         </div>
+       </div>
+       <div className={styles.tableContainer}>
+         <table className={styles.table}>
+           <thead>
+             <tr>
                {headers.map((key) => (
-                 <td key={key}>
-                   {typeof row[key] === "object" && row[key]?.seconds
-                     ? new Date(row[key].seconds * 1000).toLocaleString()
-                     : row[key].toString()}
-                 </td>
+                 <th key={key}>{key}</th>
                ))}
              </tr>
-           ))}
-         </tbody>
-       </table>
+           </thead>
+           <tbody>
+             {normalizedData.map((row, index) => (
+               <tr key={index}>
+                 {headers.map((key) => (
+                   <td key={key}>
+                     {typeof row[key] === "object" && row[key]?.seconds
+                       ? new Date(row[key].seconds * 1000).toLocaleString()
+                       : row[key].toString()}
+                   </td>
+                 ))}
+               </tr>
+             ))}
+           </tbody>
+         </table>
+       </div>
      </div>
-   </div>
    </>
  );
 }
