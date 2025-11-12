@@ -124,7 +124,7 @@ export default function FilterSection({
             ))}
           </select>
         </div>
-      ) : (
+      ) : currentTab === "comparison" ? (
         <div className="player-selection" ref={dropdownRef}>
           <label>{t("analysis.selectPlayers")}:</label>
           <div className="multi-select-dropdown">
@@ -133,10 +133,12 @@ export default function FilterSection({
               className="multi-select-button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <span className="selected-text">{getSelectedPlayerNames()}</span>
-              <span className="selected-count">
-                {selectedPlayers.length > 0 && `(${selectedPlayers.length}/5)`}
+              <span className={`selected-text ${selectedPlayers.length === 0 ? "placeholder" : ""}`}>
+                {getSelectedPlayerNames()}
               </span>
+              {selectedPlayers.length > 0 && (
+                <span className="selected-count">({selectedPlayers.length}/5)</span>
+              )}
               <span className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`}>▼</span>
             </button>
             
@@ -155,34 +157,31 @@ export default function FilterSection({
                   )}
                 </div>
                 <div className="dropdown-list">
-                  {players.map((player) => (
-                    <label
-                      key={player.id}
-                      className={`dropdown-item ${
-                        selectedPlayers.includes(player.id) ? "selected" : ""
-                      } ${
-                        !selectedPlayers.includes(player.id) && selectedPlayers.length >= 5
-                          ? "disabled"
-                          : ""
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedPlayers.includes(player.id)}
-                        onChange={() => handlePlayerCheckboxChange(player.id)}
-                        disabled={
-                          !selectedPlayers.includes(player.id) && selectedPlayers.length >= 5
-                        }
-                      />
-                      <span>{player.name}</span>
-                    </label>
-                  ))}
+                  {players.map((player) => {
+                    const isSelected = selectedPlayers.includes(player.id);
+                    const isDisabled = !isSelected && selectedPlayers.length >= 5;
+                    
+                    return (
+                      <label
+                        key={player.id}
+                        className={`dropdown-item ${isSelected ? "selected" : ""} ${isDisabled ? "disabled" : ""}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handlePlayerCheckboxChange(player.id)}
+                          disabled={isDisabled}
+                        />
+                        <span>{player.name}</span>
+                      </label>
+                    );
+                  })}
                 </div>
               </div>
             )}
           </div>
         </div>
-        )}
+              ) : null}
     </div>
   );
 }
