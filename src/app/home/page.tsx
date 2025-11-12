@@ -178,7 +178,10 @@ export default function Home() {
                     />
                   )}
                   <h3>{player.name}</h3>
-                  <p>{t("home.grade")}: {player.grade}</p>
+                  <p>
+                    {t("home.grade")}: 
+                    <span className= "grade-badge">{player.grade}</span>
+                  </p>
                   <p>{t("home.height")}: {player.height} {t("common.cm")}</p>
                   <p>{t("home.weight")}: {player.weight} {t("common.kg")}</p>
                   <p>{t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}</p>
