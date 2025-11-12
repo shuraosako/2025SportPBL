@@ -137,14 +137,6 @@
   "analysis.averageSpinByPlayer": "選手別平均回転数",
   "analysis.performanceRadar": "パフォーマンスレーダー",
   "analysis.tabs.whole":"全体",
-  "analysis.noPlayerSelected": "選手を選択してください",
-  "analysis.noData": "データがありません",
-  "analysis.averageSpeed": "平均球速",
-  "analysis.averageSpin": "平均回転数",
-  "analysis.strikeRate": "ストライク率",
-  "analysis.speed": "球速",
-  "analysis.spin": "回転数",
-  "common.kph": "km/h",
   
 
   "analysis.speedUnit": "球速",
