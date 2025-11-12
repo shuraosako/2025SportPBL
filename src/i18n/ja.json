@@ -98,6 +98,7 @@
   "analysis.tabs.individual": "個別選手分析",
   "analysis.tabs.comparison": "複数選手比較",
   "analysis.tabs.overall": "全体傾向",
+  "analysis.tabs.whole": "全体",
   "analysis.speedChart": "球速の推移",
   "analysis.spinChart": "回転数の推移",
   "analysis.strikeRateChart": "ストライク率の推移",
@@ -137,8 +138,6 @@
   "analysis.averageSpinByPlayer": "選手別平均回転数",
   "analysis.performanceRadar": "パフォーマンスレーダー",
   "analysis.tabs.whole":"全体",
-  
-
   "analysis.speedUnit": "球速",
   "analysis.dateOrTurn": "日付or回目",
   "analysis.speedAverage": "球速(平均)",

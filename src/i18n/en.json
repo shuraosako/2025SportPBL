@@ -98,6 +98,7 @@
   "analysis.tabs.individual": "Individual Analysis",
   "analysis.tabs.comparison": "Player Comparison",
   "analysis.tabs.overall": "Overall Trends",
+  "analysis.tabs.whole": "Overall",
   "analysis.speedChart": "Speed Trend",
   "analysis.spinChart": "Spin Trend",
   "analysis.strikeRateChart": "Strike Rate Trend",
@@ -143,6 +144,7 @@
   "analysis.spinAverage": "Spin (Average)",
   "analysis.scatterAxisSpeed": "Speed",
   "analysis.scatterAxisSpin": "Spin",
+  "analysis.players": "Players",
 
   "forgotPassword.title": "Forgot Password",
   "forgotPassword.email": "Email Address",
