@@ -1,0 +1,258 @@
+/* Container */
+.whole-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Controls Section */
+.whole-controls {
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 20px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+}
+
+/* Search Input */
+.whole-search-input {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 15px;
+  min-width: 250px;
+  height: 42px;
+  transition: all 0.2s;
+}
+
+.whole-search-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Buttons */
+.whole-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 15px;
+  height: 42px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.whole-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.whole-btn:active {
+  transform: translateY(0);
+}
+
+.whole-btn-primary {
+  background-color: #2563eb;
+  color: white;
+}
+
+.whole-btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.whole-btn-success {
+  background-color: #10b981;
+  color: white;
+  margin-left: auto;
+  padding: 10px 24px;
+}
+
+.whole-btn-success:hover {
+  background-color: #059669;
+}
+
+.whole-btn-danger {
+  padding: 6px 12px;
+  background-color: #ef4444;
+  color: white;
+  font-size: 13px;
+  height: auto;
+}
+
+.whole-btn-danger:hover {
+  background-color: #dc2626;
+}
+
+/* Select */
+.whole-select {
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  height: 42px;
+  background-color: white;
+  min-width: 150px;
+  transition: all 0.2s;
+}
+
+.whole-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Search Result */
+.whole-search-result {
+  color: #6b7280;
+  font-size: 15px;
+  padding: 0 8px;
+}
+
+/* No Data Message */
+.whole-no-data {
+  text-align: center;
+  color: #6b7280;
+  padding: 40px 20px;
+  font-size: 15px;
+}
+
+/* Table Wrapper */
+.whole-table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: white;
+}
+
+/* Table */
+.whole-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  font-size: 15px;
+}
+
+.whole-table thead tr {
+  background-color: #f3f4f6;
+  border-bottom: 2px solid #d1d5db;
+}
+
+.whole-table th {
+  padding: 16px 12px;
+  text-align: center;
+  font-weight: 600;
+  color: #374151;
+  border-right: 1px solid #d1d5db;
+  font-size: 15px;
+}
+
+.whole-table th:last-child {
+  border-right: none;
+}
+
+.whole-table td {
+  padding: 14px 12px;
+  text-align: center;
+  border-right: 1px solid #e5e7eb;
+  color: #111827;
+}
+
+.whole-table td:last-child {
+  border-right: none;
+}
+
+.whole-table tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color 0.15s;
+}
+
+.whole-table tbody tr:hover {
+  background-color: #f3f4f6 !important;
+}
+
+/* Row Striping */
+.whole-row-even {
+  background-color: white;
+}
+
+.whole-row-odd {
+  background-color: #f9fafb;
+}
+
+/* Input Fields */
+.whole-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  text-align: center;
+  background-color: white;
+  transition: all 0.2s;
+  min-height: 36px;
+}
+
+.whole-input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.whole-input-disabled {
+  background-color: #f9fafb;
+  cursor: not-allowed;
+  color: #9ca3af;
+}
+
+/* Existing Player Name */
+.whole-existing-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .whole-container {
+    padding: 12px;
+  }
+
+  .whole-controls {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .whole-search-input {
+    min-width: 100%;
+  }
+
+  .whole-select {
+    min-width: 100%;
+  }
+
+  .whole-btn-success {
+    margin-left: 0;
+  }
+
+  .whole-table {
+    font-size: 13px;
+  }
+
+  .whole-table th,
+  .whole-table td {
+    padding: 10px 8px;
+  }
+
+  .whole-input {
+    font-size: 13px;
+    padding: 6px 8px;
+  }
+}

@@ -3,8 +3,9 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PlayerData, Player } from "../types";
+import "./ComparisonGraph.css";
 
-const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+const COLORS = ["#8095ffff", "#7cffc2ff", "#000000ff", "#ff5959ff", "#a47dffff"];
 
 interface ComparisonGraphProps {
   players: Player[];
@@ -27,15 +28,14 @@ export default function ComparisonGraph({
     );
   }
 
-  // Prepare horizontal bar chart data
   const prepareHorizontalBarData = () => {
     const metrics = [
-      { key: 'avgSpeed', label: t("analysis.averageSpeed") },
-      { key: 'maxSpeed', label: t("analysis.maxSpeed") },
-      { key: 'avgSpin', label: t("analysis.averageSpin") },
-      { key: 'avgTrueSpin', label: t("analysis.averageTrueSpin") },
-      { key: 'avgSpinEff', label: t("analysis.averageSpinEff") },
-      { key: 'strikeRate', label: t("analysis.strikeRate") }
+      { key: 'avgSpeed', label: t("analysis.averageSpeed"), max: 200 },
+      { key: 'maxSpeed', label: t("analysis.maxSpeed"), max: 200 },
+      { key: 'avgSpin', label: t("analysis.averageSpin"), max: 3000 },
+      { key: 'avgTrueSpin', label: t("analysis.averageTrueSpin"), max: 3000 },
+      { key: 'avgSpinEff', label: t("analysis.averageSpinEff"), max: 100 },
+      { key: 'strikeRate', label: t("analysis.strikeRate"), max: 100 }
     ];
 
     return metrics.map(metric => {
@@ -65,10 +65,59 @@ export default function ComparisonGraph({
               value = (stats.filter(s => s.strike === 1).length / stats.length) * 100;
               break;
           }
-          dataPoint[playerId] = parseFloat(value.toFixed(1));
+          const normalizedValue = (value / metric.max) * 100;
+          dataPoint[playerId] = parseFloat(normalizedValue.toFixed(1));
         }
       });
 
+      return dataPoint;
+    });
+  };
+
+  const prepareRadarData = () => {
+    const allStats = playerData.filter(d => selectedPlayers.includes(d.id));
+    const maxValues = {
+      speed: Math.max(...allStats.map(d => d.speed), 1),
+      spin: Math.max(...allStats.map(d => d.spin), 1),
+      trueSpin: Math.max(...allStats.map(d => d.trueSpin), 1),
+    };
+
+    const metrics = [
+      { key: 'avgSpeed', label: t("analysis.averageSpeed") },
+      { key: 'avgSpin', label: t("analysis.averageSpin") },
+      { key: 'avgTrueSpin', label: t("analysis.averageTrueSpin") },
+      { key: 'avgSpinEff', label: t("analysis.averageSpinEff") },
+      { key: 'strikeRate', label: t("analysis.strikeRate") }
+    ];
+
+    return metrics.map(metric => {
+      const dataPoint: any = { subject: metric.label };
+      
+      selectedPlayers.slice(0, 5).forEach(playerId => {
+        const stats = playerData.filter(data => data.id === playerId);
+        if (stats.length > 0) {
+          let value = 0;
+          switch (metric.key) {
+            case 'avgSpeed':
+              value = Math.round((stats.reduce((sum, s) => sum + s.speed, 0) / stats.length) / maxValues.speed * 100);
+              break;
+            case 'avgSpin':
+              value = Math.round((stats.reduce((sum, s) => sum + s.spin, 0) / stats.length) / maxValues.spin * 100);
+              break;
+            case 'avgTrueSpin':
+              value = Math.round((stats.reduce((sum, s) => sum + s.trueSpin, 0) / stats.length) / maxValues.trueSpin * 100);
+              break;
+            case 'avgSpinEff':
+              value = Math.round(stats.reduce((sum, s) => sum + s.spinEff, 0) / stats.length);
+              break;
+            case 'strikeRate':
+              value = Math.round((stats.filter(s => s.strike === 1).length / stats.length) * 100);
+              break;
+          }
+          dataPoint[playerId] = value;
+        }
+      });
+      
       return dataPoint;
     });
   };
@@ -77,46 +126,26 @@ export default function ComparisonGraph({
     <div className="graph-section">
       <h3 className="graph-title">{t("analysis.tabs.comparison")}</h3>
 
-      <div style={{ display: 'flex', gap: '24px', marginBottom: '32px' }}>
+      <div className="comparison-container">
         {/* Player Avatars Section */}
-        <div style={{ 
-          flex: '0 0 auto',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
-          padding: '20px',
-          backgroundColor: '#fff',
-          borderRadius: '12px',
-          border: '1px solid #e0e0e0'
-        }}>
-          <h4 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: 'bold' }}>
+        <div className="player-avatars-section">
+          <h4 className="player-avatars-title">
             {t("analysis.players")}
           </h4>
           {selectedPlayers.slice(0, 5).map((playerId, index) => {
             const player = players.find(p => p.id === playerId);
             return (
-              <div key={playerId} style={{ 
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <div style={{ 
-                  width: '60px', 
-                  height: '60px', 
-                  borderRadius: '50%', 
-                  backgroundColor: COLORS[index], 
-                  border: `3px solid ${COLORS[index]}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: '24px',
-                  fontWeight: 'bold'
-                }}>
+              <div key={playerId} className="player-avatar-item">
+                <div 
+                  className="player-avatar-circle"
+                  style={{ 
+                    backgroundColor: COLORS[index], 
+                    borderColor: COLORS[index]
+                  }}
+                >
                   {player?.name.charAt(0)}
                 </div>
-                <div style={{ fontSize: '14px', fontWeight: '500', textAlign: 'center' }}>
+                <div className="player-avatar-name">
                   {player?.name}
                 </div>
               </div>
@@ -125,7 +154,7 @@ export default function ComparisonGraph({
         </div>
 
         {/* Horizontal Bar Chart Comparison */}
-        <div style={{ flex: 1, backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e0e0e0', padding: '20px' }}>
+        <div className="bar-chart-container">
           <ResponsiveContainer width="100%" height={500}>
             <BarChart 
               data={prepareHorizontalBarData()} 
@@ -171,98 +200,48 @@ export default function ComparisonGraph({
         </div>
       </div>
 
-      {/* Individual Radar Charts Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-        {selectedPlayers.slice(0, 5).map((playerId, index) => {
-          const player = players.find(p => p.id === playerId);
-          const stats = playerData.filter(d => d.id === playerId);
-          
-          if (stats.length === 0) return null;
-
-          // Calculate individual radar data
-          const allStats = playerData.filter(d => selectedPlayers.includes(d.id));
-          const maxValues = {
-            speed: Math.max(...allStats.map(d => d.speed), 1),
-            spin: Math.max(...allStats.map(d => d.spin), 1),
-            trueSpin: Math.max(...allStats.map(d => d.trueSpin), 1),
-          };
-
-          const individualRadarData = [
-            {
-              subject: t("analysis.averageSpeed"),
-              value: Math.round((stats.reduce((sum, s) => sum + s.speed, 0) / stats.length) / maxValues.speed * 100),
-              fullMark: 100
-            },
-            {
-              subject: t("analysis.averageSpin"),
-              value: Math.round((stats.reduce((sum, s) => sum + s.spin, 0) / stats.length) / maxValues.spin * 100),
-              fullMark: 100
-            },
-            {
-              subject: t("analysis.averageTrueSpin"),
-              value: Math.round((stats.reduce((sum, s) => sum + s.trueSpin, 0) / stats.length) / maxValues.trueSpin * 100),
-              fullMark: 100
-            },
-            {
-              subject: t("analysis.averageSpinEff"),
-              value: Math.round(stats.reduce((sum, s) => sum + s.spinEff, 0) / stats.length),
-              fullMark: 100
-            },
-            {
-              subject: t("analysis.strikeRate"),
-              value: Math.round((stats.filter(s => s.strike === 1).length / stats.length) * 100),
-              fullMark: 100
-            }
-          ];
-
-          return (
-            <div key={playerId} style={{ 
-              border: '1px solid #e0e0e0', 
-              borderRadius: '12px', 
-              padding: '20px',
-              backgroundColor: '#fff'
-            }}>
-              <div style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: '12px', 
-                marginBottom: '16px',
-                paddingBottom: '12px',
-                borderBottom: '1px solid #e0e0e0'
-              }}>
-                <div style={{ 
-                  width: '40px', 
-                  height: '40px', 
-                  borderRadius: '50%', 
-                  backgroundColor: COLORS[index], 
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'white',
-                  fontSize: '18px',
-                  fontWeight: 'bold'
-                }}>
-                  {player?.name.charAt(0)}
-                </div>
-                <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold' }}>{player?.name}</h4>
-              </div>
-              <ResponsiveContainer width="100%" height={280}>
-                <RadarChart data={individualRadarData}>
-                  <PolarGrid stroke="#e0e0e0" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: '#666' }} />
-                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} />
-                  <Radar
-                    dataKey="value"
-                    stroke={COLORS[index]}
-                    fill={COLORS[index]}
-                    fillOpacity={0.6}
-                    strokeWidth={2}
-                  />
-                </RadarChart>
-              </ResponsiveContainer>
-            </div>
-          );
-        })}
+      {/* Integrated Radar Chart */}
+      <div className="radar-chart-container">
+        <h4 className="radar-chart-title">
+          {t("analysis.radarComparison")}
+        </h4>
+        <ResponsiveContainer width="100%" height={500}>
+          <RadarChart data={prepareRadarData()}>
+            <PolarGrid stroke="#e0e0e0" />
+            <PolarAngleAxis dataKey="subject" tick={{ fontSize: 13, fill: '#333' }} />
+            <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 11 }} />
+            <Tooltip 
+              contentStyle={{ 
+                backgroundColor: 'rgba(255, 255, 255, 0.95)', 
+                border: '1px solid #ccc',
+                borderRadius: '8px',
+                padding: '10px',
+                fontSize: 12
+              }}
+              formatter={(value: any, name: any) => {
+                const player = players.find(p => p.id === name);
+                return [`${value}`, player?.name || name];
+              }}
+            />
+            {selectedPlayers.slice(0, 5).map((playerId, index) => {
+              const player = players.find(p => p.id === playerId);
+              return (
+                <Radar
+                  key={playerId}
+                  name={player?.name || "Unknown"}
+                  dataKey={playerId}
+                  stroke={COLORS[index]}
+                  fill={COLORS[index]}
+                  fillOpacity={0.3}
+                  strokeWidth={2}
+                  dot={{ r: 4, fill: COLORS[index], strokeWidth: 2 }}
+                  activeDot={{ r: 6, strokeWidth: 2 }}
+                />
+              );
+            })}
+            <Legend wrapperStyle={{ fontSize: 13, paddingTop: 20 }} />
+          </RadarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Comparison Table */}

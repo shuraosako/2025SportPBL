@@ -1,21 +1,38 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PlayerData, Player } from "../types";
-import { useState } from "react";
+import "./Whole.css";
 
-const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+interface Player {
+  id: string;
+  name: string;
+}
+
+interface PlayerData {
+  id: string;
+  date: string;
+  speed: number;
+  spin: number;
+  trueSpin?: number;
+  spinEff?: number;
+  spinDirect?: number;
+  verticalBreak?: number;
+  horizontalBreak?: number;
+  rating?: string;
+}
 
 interface WholeProps {
   players: Player[];
   playerData: PlayerData[];
-  onSaveData?: (data: any[]) => void; // 保存用コールバック
+  onSaveData?: (data: any[]) => void;
 }
 
 interface InputRow {
   id: string;
   playerId: string;
   playerName: string;
+  date: string;
   speed: string;
   spinRate: string;
   trueSpin: string;
@@ -25,23 +42,53 @@ interface InputRow {
   horizontalBreak: string;
   rating: string;
   isNew: boolean;
+  isExisting: boolean;
 }
 
 export default function Whole({
-  players,
-  playerData,
+  players = [],
+  playerData = [],
   onSaveData,
 }: WholeProps) {
   const { t } = useLanguage();
-  
   const [rows, setRows] = useState<InputRow[]>([]);
+  const [searchName, setSearchName] = useState<string>("");
 
-  // 新規行を追加
+  // 既存データを初期表示用に変換
+  useEffect(() => {
+    const existingRows: InputRow[] = playerData.map((data, index) => {
+      const player = players.find(p => p.id === data.id);
+      return {
+        id: `existing-data-${index}`,
+        playerId: data.id,
+        playerName: player?.name || t("player.notFound"),
+        date: data.date,
+        speed: data.speed.toString(),
+        spinRate: data.spin.toString(),
+        trueSpin: data.trueSpin?.toString() || "",
+        spinEff: data.spinEff?.toString() || "",
+        spinDirect: data.spinDirect?.toString() || "",
+        verticalBreak: data.verticalBreak?.toString() || "",
+        horizontalBreak: data.horizontalBreak?.toString() || "",
+        rating: data.rating || "",
+        isNew: false,
+        isExisting: true,
+      };
+    });
+    setRows(existingRows);
+  }, [playerData, players, t]);
+
+  const getTodayDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
   const addNewRow = () => {
     const newRow: InputRow = {
       id: `new-${Date.now()}`,
       playerId: "",
       playerName: "",
+      date: getTodayDate(),
       speed: "",
       spinRate: "",
       trueSpin: "",
@@ -51,11 +98,11 @@ export default function Whole({
       horizontalBreak: "",
       rating: "",
       isNew: true,
+      isExisting: false,
     };
-    setRows([...rows, newRow]);
+    setRows([newRow, ...rows]);
   };
 
-  // 既存プレイヤーの行を追加
   const addExistingPlayerRow = (playerId: string) => {
     const player = players.find(p => p.id === playerId);
     if (!player) return;
@@ -64,6 +111,7 @@ export default function Whole({
       id: `existing-${Date.now()}`,
       playerId: player.id,
       playerName: player.name,
+      date: getTodayDate(),
       speed: "",
       spinRate: "",
       trueSpin: "",
@@ -73,23 +121,21 @@ export default function Whole({
       horizontalBreak: "",
       rating: "",
       isNew: false,
+      isExisting: false,
     };
-    setRows([...rows, newRow]);
+    setRows([newRow, ...rows]);
   };
 
-  // 行を削除
   const removeRow = (id: string) => {
     setRows(rows.filter(row => row.id !== id));
   };
 
-  // 入力値を更新
   const updateRow = (id: string, field: keyof InputRow, value: string) => {
     setRows(rows.map(row => 
       row.id === id ? { ...row, [field]: value } : row
     ));
   };
 
-  // データを保存
   const handleSave = () => {
     if (onSaveData) {
       onSaveData(rows);
@@ -97,22 +143,35 @@ export default function Whole({
     console.log("保存データ:", rows);
   };
 
+  // 名前で検索してフィルタリング
+  const filteredRows = searchName.trim() === ""
+    ? rows
+    : rows.filter(row => 
+        row.playerName.toLowerCase().includes(searchName.toLowerCase())
+      );
+
+  // 検索結果を新規・既存で分けてソート
+  const displayRows = [
+    ...filteredRows.filter(r => !r.isExisting),
+    ...filteredRows.filter(r => r.isExisting)
+  ];
+
   return (
-    <div className="graph-section">
-      <div style={{ marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+    <div className="whole-container">
+      <div className="whole-controls">
+        <input
+          type="text"
+          placeholder={t("home.searchByName")}
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          className="whole-search-input"
+        />
+
         <button
           onClick={addNewRow}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: '500',
-          }}
+          className="whole-btn whole-btn-primary"
         >
-          新規プレイヤー追加
+          {t("home.newPlayer")}
         </button>
 
         <select
@@ -122,14 +181,9 @@ export default function Whole({
               e.target.value = "";
             }
           }}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          className="whole-select"
         >
-          <option value="">既存プレイヤーを選択</option>
+          <option value="">{t("analysis.selectPlayer")}</option>
           {players.map(player => (
             <option key={player.id} value={player.id}>
               {player.name}
@@ -140,148 +194,149 @@ export default function Whole({
         {rows.length > 0 && (
           <button
             onClick={handleSave}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: '500',
-              marginLeft: 'auto',
-            }}
+            className="whole-btn whole-btn-success"
           >
-            保存
+            {t("common.save")}
           </button>
+        )}
+
+        {searchName && (
+          <span className="whole-search-result">
+            {t("dataTable.loading")}: {displayRows.length}件
+          </span>
         )}
       </div>
 
-      {rows.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
-          プレイヤーを追加してデータを入力してください
+      {displayRows.length === 0 ? (
+        <p className="whole-no-data">
+          {searchName ? t("home.noPlayers") : t("dataTable.noData")}
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            backgroundColor: 'white',
-            fontSize: '14px'
-          }}>
+        <div className="whole-table-wrapper">
+          <table className="whole-table">
             <thead>
-              <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '2px solid #d1d5db' }}>
-                <th style={headerStyle}>選手名</th>
-                <th style={headerStyle}>球速</th>
-                <th style={headerStyle}>回転数</th>
-                <th style={headerStyle}>TRUE SPIN</th>
-                <th style={headerStyle}>SPIN EFF.</th>
-                <th style={headerStyle}>SPIN DIRECT</th>
-                <th style={headerStyle}>縦の変化量</th>
-                <th style={headerStyle}>横の変化量</th>
-                <th style={headerStyle}>評価</th>
-                <th style={headerStyle}>操作</th>
+              <tr>
+                <th>{t("analysis.playerName")}</th>
+                <th>{t("analysis.date")}</th>
+                <th>{t("analysis.speed")}</th>
+                <th>{t("analysis.spin")}</th>
+                <th>{t("analysis.trueSpin")}</th>
+                <th>{t("analysis.spinEff")}</th>
+                <th>SPIN DIRECT</th>
+                <th>{t("analysis.verticalMovement")}</th>
+                <th>{t("analysis.horizontalMovement")}</th>
+                <th>評価</th>
+                <th>{t("common.delete")}</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => (
+              {displayRows.map((row, index) => (
                 <tr 
                   key={row.id}
-                  style={{
-                    borderBottom: '1px solid #e5e7eb',
-                    backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb'
-                  }}
+                  className={index % 2 === 0 ? 'whole-row-even' : 'whole-row-odd'}
                 >
-                  <td style={cellStyle}>
+                  <td>
                     {row.isNew ? (
                       <input
                         type="text"
                         value={row.playerName}
                         onChange={(e) => updateRow(row.id, 'playerName', e.target.value)}
-                        placeholder="名前を入力"
-                        style={inputStyle}
+                        placeholder={t("createPlayer.name")}
+                        className="whole-input"
                       />
                     ) : (
-                      <span>{row.playerName}</span>
+                      <span className={row.isExisting ? 'whole-existing-name' : ''}>
+                        {row.playerName}
+                      </span>
                     )}
                   </td>
-                  <td style={cellStyle}>
+                  <td>
+                    <input
+                      type="date"
+                      value={row.date}
+                      onChange={(e) => updateRow(row.id, 'date', e.target.value)}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
+                    />
+                  </td>
+                  <td>
                     <input
                       type="number"
                       value={row.speed}
                       onChange={(e) => updateRow(row.id, 'speed', e.target.value)}
-                      style={inputStyle}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
                     />
                   </td>
-                  <td style={cellStyle}>
+                  <td>
                     <input
                       type="number"
                       value={row.spinRate}
                       onChange={(e) => updateRow(row.id, 'spinRate', e.target.value)}
-                      style={inputStyle}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
                     />
                   </td>
-                  <td style={cellStyle}>
+                  <td>
                     <input
                       type="number"
                       value={row.trueSpin}
                       onChange={(e) => updateRow(row.id, 'trueSpin', e.target.value)}
-                      style={inputStyle}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
                     />
                   </td>
-                  <td style={cellStyle}>
+                  <td>
                     <input
                       type="number"
                       value={row.spinEff}
                       onChange={(e) => updateRow(row.id, 'spinEff', e.target.value)}
-                      style={inputStyle}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
                     />
                   </td>
-                  <td style={cellStyle}>
+                  <td>
                     <input
                       type="number"
                       value={row.spinDirect}
                       onChange={(e) => updateRow(row.id, 'spinDirect', e.target.value)}
-                      style={inputStyle}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
                     />
                   </td>
-                  <td style={cellStyle}>
+                  <td>
                     <input
                       type="number"
                       value={row.verticalBreak}
                       onChange={(e) => updateRow(row.id, 'verticalBreak', e.target.value)}
-                      style={inputStyle}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
                     />
                   </td>
-                  <td style={cellStyle}>
+                  <td>
                     <input
                       type="number"
                       value={row.horizontalBreak}
                       onChange={(e) => updateRow(row.id, 'horizontalBreak', e.target.value)}
-                      style={inputStyle}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
                     />
                   </td>
-                  <td style={cellStyle}>
+                  <td>
                     <input
                       type="text"
                       value={row.rating}
                       onChange={(e) => updateRow(row.id, 'rating', e.target.value)}
-                      style={inputStyle}
+                      className={`whole-input ${row.isExisting ? 'whole-input-disabled' : ''}`}
+                      disabled={row.isExisting}
                     />
                   </td>
-                  <td style={cellStyle}>
+                  <td>
                     <button
                       onClick={() => removeRow(row.id)}
-                      style={{
-                        padding: '4px 8px',
-                        backgroundColor: '#ef4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                      }}
+                      className="whole-btn whole-btn-danger"
                     >
-                      削除
+                      {t("common.delete")}
                     </button>
                   </td>
                 </tr>
@@ -293,27 +348,3 @@ export default function Whole({
     </div>
   );
 }
-
-const headerStyle: React.CSSProperties = {
-  padding: '12px 8px',
-  textAlign: 'center',
-  fontWeight: '600',
-  color: '#374151',
-  borderRight: '1px solid #d1d5db',
-};
-
-const cellStyle: React.CSSProperties = {
-  padding: '10px 8px',
-  textAlign: 'center',
-  borderRight: '1px solid #e5e7eb',
-  color: '#111827',
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '6px 8px',
-  border: '1px solid #d1d5db',
-  borderRadius: '4px',
-  fontSize: '14px',
-  textAlign: 'center',
-};

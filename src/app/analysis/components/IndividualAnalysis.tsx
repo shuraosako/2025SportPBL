@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PlayerData, Player } from "../types";
@@ -17,6 +18,7 @@ export default function IndividualAnalysis({
   playerData,
 }: IndividualAnalysisProps) {
   const { t, language } = useLanguage();
+  const [hoveredPoint, setHoveredPoint] = useState<number | null>(null);
 
   if (!selectedPlayer) {
     return (
@@ -72,7 +74,9 @@ export default function IndividualAnalysis({
   // 散布図用データ
   const scatterData = filteredData.map(data => ({
     speed: data.speed,
-    spin: data.spin
+    spin: data.spin,
+    date: data.date,
+    strike: data.strike
   }));
 
   // 散布図の範囲を自動計算
@@ -81,9 +85,58 @@ export default function IndividualAnalysis({
   const minSpin = Math.min(...spins);
   const maxSpin = Math.max(...spins);
 
-  // 散布図のサイズ計算
-  const plotWidth = 480.5;
-  const plotHeight = 311.16;
+  // 軸の範囲に余白を追加
+  const speedPadding = (maxSpeed - minSpeed) * 0.1 || 5;
+  const spinPadding = (maxSpin - minSpin) * 0.1 || 100;
+  const speedMin = minSpeed - speedPadding;
+  const speedMax = maxSpeed + speedPadding;
+  const spinMin = minSpin - spinPadding;
+  const spinMax = maxSpin + spinPadding;
+
+  // トレンドライン計算（線形回帰）- X軸が回転数、Y軸が球速
+  const calculateTrendLine = () => {
+    const n = scatterData.length;
+    const sumX = spins.reduce((a, b) => a + b, 0);
+    const sumY = speeds.reduce((a, b) => a + b, 0);
+    const sumXY = scatterData.reduce((sum, d) => sum + d.spin * d.speed, 0);
+    const sumX2 = spins.reduce((sum, x) => sum + x * x, 0);
+    
+    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    
+    return { slope, intercept };
+  };
+
+  const trendLine = calculateTrendLine();
+
+  // トレンドラインの始点と終点
+  const trendY1 = trendLine.slope * spinMin + trendLine.intercept;
+  const trendY2 = trendLine.slope * spinMax + trendLine.intercept;
+
+  // 座標変換関数（X軸=回転数、Y軸=球速）
+  const getX = (spin: number) => ((spin - spinMin) / (spinMax - spinMin)) * 90 + 5;
+  const getY = (speed: number) => 100 - ((speed - speedMin) / (speedMax - speedMin)) * 90 - 5;
+
+  // グリッド線の位置計算（3分割）
+  const gridPositions = [25, 50, 75];
+  const getSpeedAtPosition = (pos: number) => speedMax - (speedMax - speedMin) * (pos / 100);
+  const getSpinAtPosition = (pos: number) => spinMin + (spinMax - spinMin) * (pos / 100);
+
+  // 色の計算（新しいデータほど濃く、ストライク/ボールで色分け）
+  const getPointColor = (index: number, strike: number) => {
+    const ratio = index / (scatterData.length - 1);
+    const baseColor = strike === 1 ? [66, 126, 234] : [231, 76, 60]; // 青 or 赤
+    const alpha = 0.3 + ratio * 0.7; // 0.3から1.0
+    return `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${alpha})`;
+  };
+
+  // 日付フォーマット関数
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return language === 'ja'
+      ? `${date.getMonth() + 1}/${date.getDate()}`
+      : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
 
   return (
     <div className="container">
@@ -191,29 +244,108 @@ export default function IndividualAnalysis({
           {/* 散布図 */}
           <div className="scatterCard">
             <div className="scatterPlot">
-              <span className="scatterAxisLabel scatterAxisLabelLeft">{t("analysis.scatterAxisSpeed")}</span>
-              <span className="scatterAxisLabel scatterAxisLabelBottom">{t("analysis.scatterAxisSpin")}</span>
+              {/* 軸ラベル */}
+              <span className="scatterAxisLabel scatterAxisLabelLeft">
+                {t("analysis.scatterAxisSpeed")}
+              </span>
+              <span className="scatterAxisLabel scatterAxisLabelBottom">
+                {t("analysis.scatterAxisSpin")}
+              </span>
               
+              {/* グリッド線と目盛り */}
+              {gridPositions.map((pos, idx) => (
+                <div key={`grid-${idx}`}>
+                  {/* 縦線 */}
+                  <div 
+                    className="scatterGridLine scatterGridLineVertical" 
+                    style={{ left: `${pos}%` }}
+                  />
+                  <div 
+                    className="scatterAxisTick scatterAxisTickX" 
+                    style={{ left: `${pos}%` }}
+                  >
+                    {Math.round(getSpinAtPosition(pos))}
+                  </div>
+                  
+                  {/* 横線 */}
+                  <div 
+                    className="scatterGridLine scatterGridLineHorizontal" 
+                    style={{ top: `${pos}%` }}
+                  />
+                  <div 
+                    className="scatterAxisTick scatterAxisTickY" 
+                    style={{ top: `${pos}%` }}
+                  >
+                    {Math.round(getSpeedAtPosition(pos))}
+                  </div>
+                </div>
+              ))}
+
+              {/* ゾーンラベル */}
+              <div className="scatterZoneLabel" style={{ top: '15%', left: '15%' }}>
+                {language === 'ja' ? '低速低回転' : 'Low Speed Low Spin'}
+              </div>
+              <div className="scatterZoneLabel" style={{ top: '15%', right: '15%' }}>
+                {language === 'ja' ? '高速低回転' : 'High Speed Low Spin'}
+              </div>
+              <div className="scatterZoneLabel" style={{ bottom: '15%', left: '15%' }}>
+                {language === 'ja' ? '低速高回転' : 'Low Speed High Spin'}
+              </div>
+              <div className="scatterZoneLabel" style={{ bottom: '15%', right: '15%' }}>
+                {language === 'ja' ? '高速高回転' : 'High Speed High Spin'}
+              </div>
+
+              {/* トレンドライン */}
+              <div
+                className="scatterTrendLine"
+                style={{
+                  left: `${getX(spinMin)}%`,
+                  top: `${getY(trendY1)}%`,
+                  width: `${Math.sqrt(
+                    Math.pow(getX(spinMax) - getX(spinMin), 2) +
+                    Math.pow(getY(trendY2) - getY(trendY1), 2)
+                  )}%`,
+                  transform: `rotate(${Math.atan2(
+                    getY(trendY2) - getY(trendY1),
+                    getX(spinMax) - getX(spinMin)
+                  )}rad)`,
+                }}
+              />
+              
+              {/* データポイント */}
               {scatterData.map((point, index) => {
-                const speedRange = maxSpeed - minSpeed || 1;
-                const spinRange = maxSpin - minSpin || 1;
-                const x = ((point.speed - minSpeed) / speedRange) * 90 + 5;
-                const y = 100 - ((point.spin - minSpin) / spinRange) * 90;
+                const x = getX(point.spin);
+                const y = getY(point.speed);
                 
                 return (
-                  <div
-                    key={index}
-                    className="scatterDot"
-                    style={{
-                      left: `${x}%`,
-                      top: `${y}%`
-                    }}
-                  />
+                  <div key={index}>
+                    <div
+                      className="scatterDot"
+                      style={{
+                        left: `${x}%`,
+                        top: `${y}%`,
+                        background: getPointColor(index, point.strike),
+                      }}
+                      onMouseEnter={() => setHoveredPoint(index)}
+                      onMouseLeave={() => setHoveredPoint(null)}
+                    />
+                    {hoveredPoint === index && (
+                      <div
+                        className="scatterTooltip"
+                        style={{
+                          left: `${x}%`,
+                          top: `${y}%`,
+                        }}
+                      >
+                        <div>{formatDate(point.date)}</div>
+                        <div>{t("analysis.speed")}: {point.speed}{t("common.kph")}</div>
+                        <div>{t("analysis.spin")}: {point.spin}</div>
+                        <div>{point.strike === 1 ? 'Strike' : 'Ball'}</div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
-            </div>
-            <div className="scatterSize">
-              {plotWidth.toFixed(1)} × {plotHeight.toFixed(2)}
             </div>
           </div>
         </div>

@@ -95,7 +95,7 @@
   margin-bottom: 30px;
   color: #333;
   font-weight: normal;
-  background: #f1c40f;
+  background: #ead788;
   padding: 8px 20px;
   border-radius: 8px;
 }
@@ -132,17 +132,21 @@
 
 .scatterPlot {
   position: relative;
-  width: 100%;
-  height: 280px;
+  width: calc(100% - 80px);
+  height: 350px;
   border: 2px solid #333;
   border-radius: 8px;
   background: white;
+  margin-left: 60px;
+  margin-top: 10px;
+  margin-bottom: 40px;
 }
 
 .scatterAxisLabel {
   position: absolute;
   font-size: 14px;
   color: #333;
+  font-weight: 600;
 }
 
 .scatterAxisLabelBottom {
@@ -152,18 +156,110 @@
 
 .scatterAxisLabelLeft {
   top: 10px;
-  left: -50px;
+  left: -60px;
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
 }
 
+/* グリッド線 */
+.scatterGridLine {
+  position: absolute;
+  background: #e0e0e0;
+}
+
+.scatterGridLineVertical {
+  width: 1px;
+  height: 100%;
+  top: 0;
+}
+
+.scatterGridLineHorizontal {
+  height: 1px;
+  width: 100%;
+  left: 0;
+}
+
+/* 軸ラベル */
+.scatterAxisTick {
+  position: absolute;
+  font-size: 11px;
+  color: #666;
+}
+
+.scatterAxisTickX {
+  bottom: -20px;
+  transform: translateX(-50%);
+}
+
+.scatterAxisTickY {
+  left: -45px;
+  transform: translateY(-50%);
+  text-align: right;
+  width: 40px;
+}
+
+/* ゾーンラベル */
+.scatterZoneLabel {
+  position: absolute;
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+/* トレンドライン */
+.scatterTrendLine {
+  position: absolute;
+  height: 2px;
+  background: rgba(102, 126, 234, 0.5);
+  transform-origin: left center;
+}
+
+/* 散布図の点 */
 .scatterDot {
   position: absolute;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #333;
   transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scatterDot:hover {
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+/* ツールチップ */
+.scatterTooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+}
+
+.scatterTooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.85);
 }
 
 .scatterSize {
