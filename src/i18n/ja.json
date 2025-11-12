@@ -137,6 +137,7 @@
   "analysis.maxSpeedByPlayer": "選手別最高球速",
   "analysis.averageSpinByPlayer": "選手別平均回転数",
   "analysis.performanceRadar": "パフォーマンスレーダー",
+<<<<<<< HEAD
   "analysis.speedUnit": "球速",
   "analysis.dateOrTurn": "日付or回目",
   "analysis.speedAverage": "球速(平均)",
@@ -145,6 +146,9 @@
   "analysis.scatterAxisSpin": "回転数",
   "analysis.players": "選手",
 
+=======
+  "analysis.tabs.whole":"全体",
+>>>>>>> 489948128b4f96cc8c8fcb354ca7eb1cf0b17aba
   
 
   "analysis.speedUnit": "球速",

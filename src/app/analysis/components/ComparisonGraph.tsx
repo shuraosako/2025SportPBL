@@ -203,7 +203,7 @@ export default function ComparisonGraph({
       {/* Integrated Radar Chart */}
       <div className="radar-chart-container">
         <h4 className="radar-chart-title">
-          {t("analysis.radarComparison")}
+          {t("analysis.performanceRadar")}
         </h4>
         <ResponsiveContainer width="100%" height={500}>
           <RadarChart data={prepareRadarData()}>
