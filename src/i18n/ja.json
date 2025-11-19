@@ -64,6 +64,10 @@
   "login.noAccount": "アカウントをお持ちでない方",
   "login.createAccount": "アカウントを作成",
   "login.forgotPassword": "パスワードをお忘れの方",
+  "login.emailLogin": "メールでログイン",
+  "login.phoneLogin": "電話番号でログイン",
+  "login.enterOTP": "認証コードを入力",
+  "login.phoneNumberPlaceholder": "+81 90-1234-5678",
 
   "createAccount.title": "新規アカウント作成",
   "createAccount.username": "ユーザー名",
