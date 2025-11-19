@@ -123,12 +123,14 @@
   cursor: not-allowed;
 }
 
-.dropdown-item input[type="checkbox"] {
+.dropdown-item input[type="checkbox"],
+.dropdown-item input[type="radio"] {
   margin-right: 10px;
   cursor: pointer;
 }
 
-.dropdown-item.disabled input[type="checkbox"] {
+.dropdown-item.disabled input[type="checkbox"],
+.dropdown-item.disabled input[type="radio"] {
   cursor: not-allowed;
 }
 
