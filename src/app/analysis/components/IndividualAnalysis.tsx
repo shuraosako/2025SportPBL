@@ -146,17 +146,13 @@ export default function IndividualAnalysis({
           {/* 球速グラフ */}
           <div className="chartCard">
             <h3 className="chartTitle">
-              {t("analysis.speed")}<br />({t("common.kph")})
+              {t("analysis.speed")}({t("common.kph")})
             </h3>
             
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={speedChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fontSize: 12 }}
-                  label={{ value: t("analysis.dateOrTurn"), position: 'insideBottomRight', offset: -5, fontSize: 12 }}
-                />
+                
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#e74c3c" radius={[4, 4, 0, 0]} />
@@ -173,11 +169,7 @@ export default function IndividualAnalysis({
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={spinChartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis 
-                  dataKey="name" 
-                  tick={{ fontSize: 12 }}
-                  label={{ value: t("analysis.dateOrTurn"), position: 'insideBottomRight', offset: -5, fontSize: 12 }}
-                />
+                
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#667eea" radius={[4, 4, 0, 0]} />
