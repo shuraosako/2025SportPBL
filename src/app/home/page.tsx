@@ -164,31 +164,31 @@ export default function Home() {
             {filteredPlayers.length > 0 ? (
               filteredPlayers.map((player) => (
                 <div
-                  key={player.id}
-                  className="player-card"
-                  onClick={() => handlePlayerClick(player.id)}
-                >
-                  {player.imageURL && (
-                    <Image
-                      src={player.imageURL}
-                      alt={`${player.name}'s profile`}
-                      className="player-photo"
-                      width={80}
-                      height={80}
-                    />
-                  )}
-                  <h3>{player.name}</h3>
-                  <p>
-                    {t("home.grade")}: 
-                    <span className= "grade-badge">{player.grade}</span>
-                  </p>
-                  <p>{t("home.height")}: {player.height} {t("common.cm")}</p>
-                  <p>{t("home.weight")}: {player.weight} {t("common.kg")}</p>
-                  <p>{t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}</p>
-                  <p>{t("home.maxSpeed")}:</p>
-                  <p>{t("home.favoriteType")}:</p>
-
-                </div>
+  key={player.id}
+  className="player-card"
+  onClick={() => handlePlayerClick(player.id)}
+>
+  <div className="player-card-content">
+    <div className="player-info-left">
+      <p>{t("home.grade")}: <span className="grade-label">{player.grade}</span></p>
+      <h3 style={{margin: '0'}}>{player.name}</h3>
+      <p style={{margin: '5px 0'}}>{t("home.height")}: {player.height} {t("common.cm")} / {t("home.weight")}: {player.weight} {t("common.kg")}</p>
+      <hr style={{border: '0', borderTop: '1px solid #ddd', margin: '10px 0', width: '100%'}} />
+      <p>{t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}</p>
+      <p>{t("home.maxSpeed")}:</p>
+      <p>{t("home.favoriteType")}:</p>
+    </div>
+    {player.imageURL && (
+      <Image
+        src={player.imageURL}
+        alt={`${player.name}'s profile`}
+        className="player-photo-right"
+        width={80}
+        height={80}
+      />
+    )}
+  </div>
+</div>
               ))
             ) : (
               <p>{t("home.noPlayers")}</p>
