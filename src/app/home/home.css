@@ -3,7 +3,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 12px;
 
   margin: 0;
   box-sizing: border-box;
@@ -28,7 +28,7 @@
   gap: 20px;
   align-items: center;
   justify-content: flex-end; /* Align the profile box and hamburger icon to the right */
-  padding-right: 20px;
+  padding-right: 12px;
 }
 
 .header-right li {
@@ -49,14 +49,17 @@
 }
 
 .player-card {
-  border: 1px solid #ccc;
-  padding: 15px;
+  background: white;
+  padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  background-color: #fff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 280px;
 }
 
 .player-card:hover {
@@ -64,38 +67,116 @@
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
 }
 
+.top-section {
+  display: flex;
+  gap:12px;
+  align-items: flex-start;
+  margin-bottom:8px;
+}
+
 .player-photo {
   width: 80px;
   height: 80px;
   object-fit: cover;
-  border-radius: 50%;
-  margin-bottom: 10px;
+  border-radius: 12px;
+  flex-shrink: 0;
 }
 
+.player-header{
+  display:flex;
+  flex-direction:column;
+  gap: 8px;
+  flex: 1;
+}
+.player-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
 /* Grade Badge */
 .grade-badge {
   display: inline-block;
   background: linear-gradient(135deg, #4FC3F7, #2196F3);
   color: white;
   padding: 4px 12px;
-  border-radius: 16px;
+  border-radius: 999px;
   font-size: 13px;
-  font-weight: 600;
-  margin-left: 8px;
+  font-weight: 700;
   box-shadow: 0 2px 6px rgba(33, 150, 243, 0.3);
+  width: fit-content;
 }
 
-/* 身長・体重を小さく、横並びで控えめに */
-.player-card p:nth-of-type(2),
-.player-card p:nth-of-type(3) {
-  display: inline-block;
+highlights-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom:12px;
+}
+
+.highlight-item {
+  padding: 12px 14px;
+  background: #eef6ff;
+  border-left: 4px solid #2196F3;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: left;
+  color: #1976D2;
+}
+
+.hightlight-label {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.highlight-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1976D2;
+}
+
+.body-info{
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.body-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #666;
+  padding: 6px 12px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.body-stat-label {
+  color: #999;
+  font-size: 13px;
+}
+
+.body-stat-value {
+  color: #333;
+  font-weight: 600;
+}
+
+.update-date {
   font-size: 11px;
   color: #999;
-  margin: 4px 6px;
-  padding: 4px 10px;
-  background-color: #f5f5f5;
-  border-radius: 12px;
+  text-align: right;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
 }
+
 
 /* Profile Popup */
 .profile-section {
@@ -157,7 +238,8 @@
 /* Main Layout */
 .main-content {
   display: flex;
-  height: calc(100vh - 60px);
+  min-height: calc(100vh - 60px);
+  height: auto;
   margin-top: 10px;
 }
 
