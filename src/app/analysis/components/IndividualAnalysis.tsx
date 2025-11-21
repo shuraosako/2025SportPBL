@@ -60,16 +60,33 @@ export default function IndividualAnalysis({
     ? `${dateObj.getFullYear()}年${dateObj.getMonth() + 1}月${dateObj.getDate()}日`
     : dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-  // グラフ用データ
-  const speedChartData = filteredData.map((data, index) => ({
-    name: `${data.date.split('-')[1]}/${data.date.split('-')[2]}`,
-    value: data.speed
-  }));
+  // 月ラベル
+  const monthLabel = t("analysis.monthLabel");
 
-  const spinChartData = filteredData.map((data, index) => ({
-    name: `${data.date.split('-')[1]}/${data.date.split('-')[2]}`,
-    value: data.spin
-  }));
+  // グラフ用データ（横軸は数字のみ）
+  const speedChartData = filteredData.map((data) => {
+    const parts = data.date.split('/');
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    
+    return {
+      name: `${month}`,
+      displayDate: `${month}/${day}`,
+      value: data.speed
+    };
+  });
+
+  const spinChartData = filteredData.map((data) => {
+    const parts = data.date.split('/');
+    const month = parseInt(parts[1], 10);
+    const day = parseInt(parts[2], 10);
+    
+    return {
+      name: `${month}`,
+      displayDate: `${month}/${day}`,
+      value: data.spin
+    };
+  });
 
   // 散布図用データ
   const scatterData = filteredData.map(data => ({
@@ -146,7 +163,7 @@ export default function IndividualAnalysis({
           {/* 球速グラフ */}
           <div className="chartCard">
             <h3 className="chartTitle">
-              {t("analysis.speed")}<br />({t("common.kph")})
+              {t("analysis.speed")}({t("common.kph")})
             </h3>
             
             <ResponsiveContainer width="100%" height={200}>
@@ -155,10 +172,22 @@ export default function IndividualAnalysis({
                 <XAxis 
                   dataKey="name" 
                   tick={{ fontSize: 12 }}
-                  label={{ value: t("analysis.dateOrTurn"), position: 'insideBottomRight', offset: -5, fontSize: 12 }}
+                  label={{ value: monthLabel, position: 'insideBottomRight', offset: 0, fontSize: 12 }}
                 />
                 <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
+                <Tooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload[0]) {
+                      return (
+                        <div style={{ background: 'white', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+                          <p style={{ margin: 0 }}>{payload[0].payload.displayDate}</p>
+                          <p style={{ margin: 0, color: '#e74c3c' }}>{t("analysis.speed")}: {payload[0].value}{t("common.kph")}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
                 <Bar dataKey="value" fill="#e74c3c" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -176,10 +205,22 @@ export default function IndividualAnalysis({
                 <XAxis 
                   dataKey="name" 
                   tick={{ fontSize: 12 }}
-                  label={{ value: t("analysis.dateOrTurn"), position: 'insideBottomRight', offset: -5, fontSize: 12 }}
+                  label={{ value: monthLabel, position: 'insideBottomRight', offset: 0, fontSize: 12 }}
                 />
                 <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
+                <Tooltip 
+                  content={({ active, payload }) => {
+                    if (active && payload && payload[0]) {
+                      return (
+                        <div style={{ background: 'white', padding: '8px', border: '1px solid #ccc', borderRadius: '4px' }}>
+                          <p style={{ margin: 0 }}>{payload[0].payload.displayDate}</p>
+                          <p style={{ margin: 0, color: '#667eea' }}>{t("analysis.spin")}: {payload[0].value}</p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
                 <Bar dataKey="value" fill="#667eea" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
