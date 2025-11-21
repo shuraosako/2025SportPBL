@@ -145,6 +145,7 @@
   "analysis.scatterAxisSpeed": "Speed",
   "analysis.scatterAxisSpin": "Spin",
   "analysis.players": "Players",
+  "analysis.monthLabel": "Month",
 
   "forgotPassword.title": "Forgot Password",
   "forgotPassword.email": "Email Address",
