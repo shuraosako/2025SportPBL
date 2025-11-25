@@ -56,6 +56,8 @@
   "profile.uploadPhoto": "Upload New Profile Photo",
   "profile.saveChanges": "Save Changes",
   "profile.saving": "Saving...",
+  "profile.accountInfo": "Account Information",
+  "profile.phoneAuth": "Phone Number Authentication",
 
   "login.title": "Login",
   "login.email": "Email Address",

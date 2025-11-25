@@ -56,7 +56,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
   const handlePhoneNumberSignIn = async () => {
     if (!phoneNumber) {
-      alert("Please enter your phone number.");
+      alert(t("profile.alerts.enterPhone"));
       return;
     }
 
@@ -72,16 +72,16 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
       const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
       setVerificationId(confirmationResult.verificationId);
-      alert("OTP sent to your phone number.");
+      alert(t("profile.alerts.otpSent"));
     } catch (error) {
       console.error("Error sending OTP:", error);
-      alert("Failed to send OTP. Please try again.");
+      alert(t("profile.alerts.otpFailed"));
     }
   };
 
   const handleVerifyOtp = async () => {
     if (!verificationId || !otp) {
-      alert("Please enter the OTP.");
+      alert(t("profile.alerts.enterOtp"));
       return;
     }
 
@@ -89,19 +89,19 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       const credential = PhoneAuthProvider.credential(verificationId, otp);
       if (user) {
         await updatePhoneNumber(user, credential);
-        alert("Phone number updated successfully.");
+        alert(t("profile.alerts.phoneUpdated"));
       } else {
-        alert("User not logged in.");
+        alert(t("profile.alerts.notLoggedIn"));
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      alert("Failed to verify OTP. Please try again.");
+      alert(t("profile.alerts.verifyFailed"));
     }
   };
 
   const handleSaveChanges = async () => {
     if (!user) {
-      alert("User not logged in.");
+      alert(t("profile.alerts.notLoggedIn"));
       return;
     }
 
@@ -112,13 +112,13 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
     try {
       if (newPassword) {
         if (newPassword.length < 6) {
-          alert("Password must be at least 6 characters long.");
+          alert(t("profile.alerts.passwordLength"));
           setIsLoading(false);
           return;
         }
 
         await updatePassword(user, newPassword);
-        alert("Password updated successfully.");
+        alert(t("profile.alerts.passwordUpdated"));
       }
 
       if (newUsername) {
@@ -127,7 +127,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
       if (profileImage) {
         if (!profileImage.type.startsWith('image/')) {
-          alert("Invalid file type. Please upload an image.");
+          alert(t("profile.alerts.invalidFile"));
           setIsLoading(false);
           return;
         }
@@ -139,13 +139,13 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
       if (Object.keys(updates).length > 0) {
         await updateDoc(doc(db, "users", user.uid), updates);
-        alert("Profile updated successfully.");
+        alert(t("profile.alerts.profileUpdated"));
       } else {
-        alert("No changes to save.");
+        alert(t("profile.alerts.noChanges"));
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      alert("Failed to update profile. Please try again.");
+      alert(t("profile.alerts.updateFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -219,7 +219,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
           {/* Right Column - Profile Information */}
           <div className="profile-main">
             <div className="profile-card">
-              <h2 className="section-title">アカウント情報</h2>
+              <h2 className="section-title">{t("profile.accountInfo")}</h2>
 
               <div className="form-group">
                 <label className="form-label">{t("profile.newUsername")}</label>
@@ -228,7 +228,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                   className="form-input"
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
-                  placeholder="ユーザー名を入力"
+                  placeholder={t("profile.usernamePlaceholder")}
                 />
               </div>
 
@@ -239,13 +239,13 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                   className="form-input"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="新しいパスワード (6文字以上)"
+                  placeholder={t("profile.passwordPlaceholder")}
                 />
               </div>
             </div>
 
             <div className="profile-card">
-              <h2 className="section-title">電話番号認証</h2>
+              <h2 className="section-title">{t("profile.phoneAuth")}</h2>
 
               <div className="form-group">
                 <label className="form-label">{t("profile.phoneNumber")}</label>
@@ -272,7 +272,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                       className="form-input"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      placeholder="認証コードを入力"
+                      placeholder={t("profile.otpPlaceholder")}
                     />
                     <button className="btn-secondary" onClick={handleVerifyOtp}>
                       {t("profile.verifyOTP")}

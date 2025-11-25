@@ -56,6 +56,8 @@
   "profile.uploadPhoto": "新しいプロフィール写真をアップロード",
   "profile.saveChanges": "変更を保存",
   "profile.saving": "保存中...",
+  "profile.accountInfo": "アカウント情報",
+  "profile.phoneAuth": "電話番号認証",
 
   "login.title": "ログイン",
   "login.email": "メールアドレス",
