@@ -13,12 +13,18 @@ import { Player } from "@/types";
 import { formatFirebaseDate } from "@/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+// Playerタイプを拡張（得意球種と利き手を追加）
+interface ExtendedPlayer extends Player {
+  throwingHand?: string;
+  favoritePitch?: string;
+}
+
 export default function Home() {
   const router = useRouter();
   const { t } = useLanguage();
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [filteredPlayers, setFilteredPlayers] = useState<Player[]>([]);
+  const [players, setPlayers] = useState<ExtendedPlayer[]>([]);
+  const [filteredPlayers, setFilteredPlayers] = useState<ExtendedPlayer[]>([]);
   const [names, setNames] = useState<string[]>([]);
   const [grades, setGrades] = useState<string[]>([]);
   const [searchName, setSearchName] = useState("");
@@ -34,7 +40,7 @@ export default function Home() {
         const playerList = playerSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        })) as Player[];
+        })) as ExtendedPlayer[];
  
         const uniqueNames = Array.from(new Set(playerList.map((player) => player.name)));
         const uniqueGrades = Array.from(new Set(playerList.map((player) => player.grade)));
@@ -102,6 +108,27 @@ export default function Home() {
     router.push(`/player/${playerId}`);
   };
 
+  // 利き手の翻訳を取得
+  const getThrowingHandLabel = (hand: string) => {
+    if (hand === "right") return t("createPlayer.rightHanded");
+    if (hand === "left") return t("createPlayer.leftHanded");
+    return hand;
+  };
+
+  // 得意球種の翻訳を取得
+  const getFavoritePitchLabel = (pitch: string) => {
+    const pitchMap: { [key: string]: string } = {
+      fastball: t("createPlayer.fastball"),
+      curveball: t("createPlayer.curveball"),
+      slider: t("createPlayer.slider"),
+      changeup: t("createPlayer.changeup"),
+      splitter: t("createPlayer.splitter"),
+      forkball: t("createPlayer.forkball"),
+      cutter: t("createPlayer.cutter"),
+    };
+    return pitchMap[pitch] || pitch;
+  };
+
   return (
     <>
       <Navigation showProfile={true} showHamburger={true} />
@@ -151,11 +178,10 @@ export default function Home() {
             </select>
 
             <div className="filter_button">
-
-            <button onClick={handleFilter}>{t("home.filter")}</button>
+              <button onClick={handleFilter}>{t("home.filter")}</button>
             </div>
             <div className="new_player">
-            <button onClick={handleAddNewPlayer}>{t("home.newPlayer")}</button>
+              <button onClick={handleAddNewPlayer}>{t("home.newPlayer")}</button>
             </div>
           </div>
  
@@ -163,45 +189,54 @@ export default function Home() {
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
               filteredPlayers.map((player) => (
-                
                 <div
-  key={player.id}
-  className="player-card"
-  onClick={() => handlePlayerClick(player.id)}
->
-  <div className="player-card-header">
-    <span className="grade-badge">{player.grade}</span>
-  </div>
-  <div className="player-card-body">
-    {player.imageURL && (
-      <Image
-        src={player.imageURL}
-        alt={`${player.name}'s profile`}
-        className="player-photo-circle"
-        width={60}
-        height={60}
-      />
-    )}
-    <h3 className="player-name">{player.name}</h3>
-    <p className="player-stats">{t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}</p>
-    <div className="player-bar">
-      <div className="player-bar-fill" style={{width: '70%'}}></div>
-    </div>
-    <div className="player-details">
-      <p>{t("home.maxSpeed")}: 130/120[km/h]</p>
-      <p>{t("home.condition")}: <span className="condition-check">✓</span> 出場可能</p>
-    </div>
-    <div className="player-tags">
-      <span className="tag tag-blue">{t("home.fastball")}</span>
-      <span className="tag tag-blue">{t("home.leftHanded")}</span>
-      <span className="tag tag-blue">{t("home.straight")}</span>
-      <span className="tag tag-green">{t("home.healthy")}</span>
-    </div>
-  </div>
-  <div className="player-card-footer">
-    {t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}
-  </div>
-</div>
+                  key={player.id}
+                  className="player-card"
+                  onClick={() => handlePlayerClick(player.id)}
+                >
+                  <div className="player-card-header">
+                    <span className="grade-badge">{player.grade}</span>
+                  </div>
+                  <div className="player-card-body">
+                    {player.imageURL && (
+                      <Image
+                        src={player.imageURL}
+                        alt={`${player.name}'s profile`}
+                        className="player-photo-circle"
+                        width={60}
+                        height={60}
+                      />
+                    )}
+                    <h3 className="player-name">{player.name}</h3>
+                    <p className="player-stats">
+                      {t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}
+                    </p>
+                    <div className="player-bar">
+                      <div className="player-bar-fill" style={{width: '70%'}}></div>
+                    </div>
+                    <div className="player-details">
+                      <p>{t("home.maxSpeed")}: 130/120[km/h]</p>
+                      <p>{t("home.condition")}: <span className="condition-check">✓</span> 出場可能</p>
+                    </div>
+                    <div className="player-tags">
+                      {player.favoritePitch && (
+                        <span className="tag tag-blue">
+                          {getFavoritePitchLabel(player.favoritePitch)}
+                        </span>
+                      )}
+                      {player.throwingHand && (
+                        <span className="tag tag-blue">
+                          {getThrowingHandLabel(player.throwingHand)}
+                        </span>
+                      )}
+                      <span className="tag tag-blue">{t("home.straight")}</span>
+                      <span className="tag tag-green">{t("home.healthy")}</span>
+                    </div>
+                  </div>
+                  <div className="player-card-footer">
+                    {t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}
+                  </div>
+                </div>
               ))
             ) : (
               <p>{t("home.noPlayers")}</p>
