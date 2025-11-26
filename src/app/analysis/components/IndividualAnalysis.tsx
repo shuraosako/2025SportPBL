@@ -64,25 +64,43 @@ export default function IndividualAnalysis({
   const monthLabel = t("analysis.monthLabel");
 
   // グラフ用データ（横軸は数字のみ）
-  const speedChartData = filteredData.map((data) => {
+  const speedChartData = filteredData.map((data, index) => {
     const parts = data.date.split('/');
     const month = parseInt(parts[1], 10);
     const day = parseInt(parts[2], 10);
     
+    // 左隣（前のデータ）と同じ月なら空文字、違えば月を表示
+    let displayMonth = `${month}`;
+    if (index > 0) {
+      const prevMonth = parseInt(filteredData[index - 1].date.split('/')[1], 10);
+      if (month === prevMonth) {
+        displayMonth = '';
+      }
+    }
+    
     return {
-      name: `${month}`,
+      name: displayMonth,
       displayDate: `${month}/${day}`,
       value: data.speed
     };
   });
 
-  const spinChartData = filteredData.map((data) => {
+  const spinChartData = filteredData.map((data, index) => {
     const parts = data.date.split('/');
     const month = parseInt(parts[1], 10);
     const day = parseInt(parts[2], 10);
     
+    // 左隣（前のデータ）と同じ月なら空文字、違えば月を表示
+    let displayMonth = `${month}`;
+    if (index > 0) {
+      const prevMonth = parseInt(filteredData[index - 1].date.split('/')[1], 10);
+      if (month === prevMonth) {
+        displayMonth = '';
+      }
+    }
+    
     return {
-      name: `${month}`,
+      name: displayMonth,
       displayDate: `${month}/${day}`,
       value: data.spin
     };

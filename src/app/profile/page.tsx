@@ -103,7 +103,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
   const handlePhoneNumberSignIn = async () => {
     if (!phoneNumber) {
-      showMessage('error', '電話番号を入力してください。');
+      alert(t("profile.alerts.enterPhone"));
       return;
     }
 
@@ -117,16 +117,16 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
       const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
       setVerificationId(confirmationResult.verificationId);
-      showMessage('success', 'OTPを送信しました。');
+      alert(t("profile.alerts.otpSent"));
     } catch (error) {
       console.error("Error sending OTP:", error);
-      showMessage('error', 'OTPの送信に失敗しました。');
+      alert(t("profile.alerts.otpFailed"));
     }
   };
 
   const handleVerifyOtp = async () => {
     if (!verificationId || !otp) {
-      showMessage('error', 'OTPを入力してください。');
+      alert(t("profile.alerts.enterOtp"));
       return;
     }
 
@@ -134,23 +134,19 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       const credential = PhoneAuthProvider.credential(verificationId, otp);
       if (user) {
         await updatePhoneNumber(user, credential);
-        showMessage('success', '電話番号を更新しました。');
+        alert(t("profile.alerts.phoneUpdated"));
+      } else {
+        alert(t("profile.alerts.notLoggedIn"));
       }
     } catch (error) {
       console.error("Error verifying OTP:", error);
-      showMessage('error', 'OTPの検証に失敗しました。');
+      alert(t("profile.alerts.verifyFailed"));
     }
   };
 
   const handleSaveChanges = async () => {
     if (!user) {
-      showMessage('error', 'ログインしていません。');
-      return;
-    }
-
-    // パスワード確認
-    if (newPassword && newPassword !== confirmPassword) {
-      showMessage('error', 'パスワードが一致しません。');
+      alert(t("profile.alerts.notLoggedIn"));
       return;
     }
 
@@ -162,12 +158,12 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       // パスワード更新
       if (newPassword) {
         if (newPassword.length < 6) {
-          showMessage('error', 'パスワードは6文字以上で入力してください。');
+          alert(t("profile.alerts.passwordLength"));
           setIsLoading(false);
           return;
         }
         await updatePassword(user, newPassword);
-        hasChanges = true;
+        alert(t("profile.alerts.passwordUpdated"));
       }
 
       // その他の更新
@@ -180,7 +176,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       // プロフィール画像更新
       if (profileImage) {
         if (!profileImage.type.startsWith('image/')) {
-          showMessage('error', '画像ファイルを選択してください。');
+          alert(t("profile.alerts.invalidFile"));
           setIsLoading(false);
           return;
         }
@@ -199,19 +195,13 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       // Firestoreを更新
       if (Object.keys(updates).length > 0) {
         await updateDoc(doc(db, "users", user.uid), updates);
-        hasChanges = true;
-      }
-
-      if (hasChanges) {
-        showMessage('success', 'プロフィールを更新しました！');
-        setNewPassword("");
-        setConfirmPassword("");
+        alert(t("profile.alerts.profileUpdated"));
       } else {
-        showMessage('error', '変更する項目がありません。');
+        alert(t("profile.alerts.noChanges"));
       }
     } catch (error) {
       console.error("Error updating profile:", error);
-      showMessage('error', 'プロフィールの更新に失敗しました。');
+      alert(t("profile.alerts.updateFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -363,7 +353,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
           <div className="profile-main">
             {/* Basic Information */}
             <div className="profile-card">
-              <h2 className="section-title">👤 基本情報</h2>
+              <h2 className="section-title">{t("profile.accountInfo")}</h2>
 
               <div className="form-group">
                 <label className="form-label">ユーザー名</label>
@@ -372,7 +362,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                   className="form-input"
                   value={newUsername}
                   onChange={(e) => setNewUsername(e.target.value)}
-                  placeholder="ユーザー名を入力"
+                  placeholder={t("profile.usernamePlaceholder")}
                 />
               </div>
 
@@ -404,9 +394,9 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                 <input
                   type="email"
                   className="form-input"
-                  value={email}
-                  disabled
-                  placeholder="メールアドレス"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder={t("profile.passwordPlaceholder")}
                 />
               </div>
             </div>
@@ -487,7 +477,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
             {/* Phone Verification */}
             <div className="profile-card">
-              <h2 className="section-title">📱 電話番号認証</h2>
+              <h2 className="section-title">{t("profile.phoneAuth")}</h2>
 
               <div className="form-group">
                 <label className="form-label">電話番号</label>
@@ -514,7 +504,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                       className="form-input"
                       value={otp}
                       onChange={(e) => setOtp(e.target.value)}
-                      placeholder="認証コードを入力"
+                      placeholder={t("profile.otpPlaceholder")}
                     />
                     <button className="btn-secondary" onClick={handleVerifyOtp}>
                       ✓ 認証
