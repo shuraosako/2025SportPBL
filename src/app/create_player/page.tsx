@@ -8,16 +8,20 @@ import { db, storage } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Homepage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [error, setError] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [grade, setGrade] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [date, setDate] = useState(""); // New state for the selected date
+  const [throwingHand, setThrowingHand] = useState("");
+  const [favoritePitch, setFavoritePitch] = useState("");
+  const [date, setDate] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
 
@@ -43,8 +47,8 @@ export default function Homepage() {
   const handleAddPlayer = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
-    if (!playerName || !grade || !height || !weight || !date || !image) {
-      setError("All fields, including profile photo and date, are required.");
+    if (!playerName || !grade || !height || !weight || !throwingHand || !favoritePitch || !date || !image) {
+      setError(t("createPlayer.errorAllFields"));
       return;
     }
 
@@ -64,8 +68,10 @@ export default function Homepage() {
         grade: grade,
         height: height,
         weight: weight,
-        creationDate: date, // Store manually selected date
-        imageURL: imageDownloadURL, // Store image URL
+        throwingHand: throwingHand,
+        favoritePitch: favoritePitch,
+        creationDate: date,
+        imageURL: imageDownloadURL,
       });
 
       // Clear form fields and image preview
@@ -73,13 +79,17 @@ export default function Homepage() {
       setGrade("");
       setHeight("");
       setWeight("");
+      setThrowingHand("");
+      setFavoritePitch("");
       setDate("");
       setImage(null);
       setImageURL(null);
       setError("");
+      
+      router.push("/");
     } catch (err) {
       console.error("Error adding player:", err);
-      setError("Failed to add player.");
+      setError(t("createPlayer.errorFailed"));
     }
   };
 
@@ -89,7 +99,7 @@ export default function Homepage() {
 
       <div className="main-content">
         <div className="add-player-form">
-          <h2>Add New Player</h2>
+          <h2>{t("createPlayer.title")}</h2>
 
           {/* Profile Image Preview */}
           {imageURL && (
@@ -99,7 +109,7 @@ export default function Homepage() {
           )}
 
           <form onSubmit={handleAddPlayer}>
-            <label>Players Name:</label>
+            <label>{t("createPlayer.name")}:</label>
             <input
               type="text"
               value={playerName}
@@ -107,7 +117,7 @@ export default function Homepage() {
               required
             />
 
-            <label>Grade:</label>
+            <label>{t("createPlayer.grade")}:</label>
             <input
               type="text"
               value={grade}
@@ -115,7 +125,7 @@ export default function Homepage() {
               required
             />
 
-            <label>Height (cm):</label>
+            <label>{t("createPlayer.height")}:</label>
             <input
               type="number"
               value={height}
@@ -123,7 +133,7 @@ export default function Homepage() {
               required
             />
 
-            <label>Weight (kg):</label>
+            <label>{t("createPlayer.weight")}:</label>
             <input
               type="number"
               value={weight}
@@ -131,8 +141,35 @@ export default function Homepage() {
               required
             />
 
+            <label>{t("createPlayer.throwingHand")}:</label>
+            <select
+              value={throwingHand}
+              onChange={(e) => setThrowingHand(e.target.value)}
+              required
+            >
+              <option value="">{t("createPlayer.selectThrowingHand")}</option>
+              <option value="right">{t("createPlayer.rightHanded")}</option>
+              <option value="left">{t("createPlayer.leftHanded")}</option>
+            </select>
+
+            <label>{t("createPlayer.favoritePitch")}:</label>
+            <select
+              value={favoritePitch}
+              onChange={(e) => setFavoritePitch(e.target.value)}
+              required
+            >
+              <option value="">{t("createPlayer.selectFavoritePitch")}</option>
+              <option value="fastball">{t("createPlayer.fastball")}</option>
+              <option value="curveball">{t("createPlayer.curveball")}</option>
+              <option value="slider">{t("createPlayer.slider")}</option>
+              <option value="changeup">{t("createPlayer.changeup")}</option>
+              <option value="splitter">{t("createPlayer.splitter")}</option>
+              <option value="forkball">{t("createPlayer.forkball")}</option>
+              <option value="cutter">{t("createPlayer.cutter")}</option>
+            </select>
+
             {/* Date Selection */}
-            <label>Date:</label>
+            <label>{t("createPlayer.date")}:</label>
             <input
               type="date"
               value={date}
@@ -141,10 +178,10 @@ export default function Homepage() {
             />
 
             {/* Image Upload */}
-            <label>Profile Photo:</label>
+            <label>{t("createPlayer.photo")}:</label>
             <input type="file" accept="image/*" onChange={handleImageChange} required />
 
-            <button type="submit">Add Player</button>
+            <button type="submit">{t("createPlayer.submit")}</button>
           </form>
           {error && <p className="error-message">{error}</p>}
         </div>
