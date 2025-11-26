@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import "./Whole.css";
 
 interface Player {
   id: string;
   name: string;
+  nameEn?: string; // 英語名を追加
 }
 
 interface PlayerData {
@@ -50,39 +51,49 @@ export default function Whole({
   playerData = [],
   onSaveData,
 }: WholeProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage(); // languageを追加
   const [searchName, setSearchName] = useState<string>("");
 
   // 既存データを表示用に変換
-  const rows: InputRow[] = playerData.map((data, index) => {
-    const player = players.find(p => p.id === data.id);
-    return {
-      id: `existing-data-${index}`,
-      playerId: data.id,
-      playerName: player?.name || t("player.notFound"),
-      date: data.date,
-      speed: data.speed.toString(),
-      spinRate: data.spin.toString(),
-      trueSpin: data.trueSpin?.toString() || "",
-      spinEff: data.spinEff?.toString() || "",
-      spinDirect: data.spinDirect?.toString() || "",
-      verticalBreak: data.verticalBreak?.toString() || "",
-      horizontalBreak: data.horizontalBreak?.toString() || "",
-      rating: data.rating || "",
-      isNew: false,
-      isExisting: true,
-    };
-  });
+  const rows: InputRow[] = useMemo(() => 
+    playerData.map((data, index) => {
+      const player = players.find(p => p.id === data.id);
+      // 言語に応じて名前を選択
+      const displayName = language === 'en' && player?.nameEn 
+        ? player.nameEn 
+        : player?.name || t("player.notFound");
+      
+      return {
+        id: `existing-data-${index}`,
+        playerId: data.id,
+        playerName: displayName,
+        date: data.date,
+        speed: data.speed.toString(),
+        spinRate: data.spin.toString(),
+        trueSpin: data.trueSpin?.toString() || "",
+        spinEff: data.spinEff?.toString() || "",
+        spinDirect: data.spinDirect?.toString() || "",
+        verticalBreak: data.verticalBreak?.toString() || "",
+        horizontalBreak: data.horizontalBreak?.toString() || "",
+        rating: data.rating || "",
+        isNew: false,
+        isExisting: true,
+      };
+    }), [playerData, players, t, language]
+  );
 
   // 名前で検索してフィルタリング
-  const filteredRows = searchName.trim() === ""
-    ? rows
-    : rows.filter(row => 
-        row.playerName.toLowerCase().includes(searchName.toLowerCase())
-      );
+  const filteredRows = useMemo(() => 
+    searchName.trim() === ""
+      ? rows
+      : rows.filter(row => 
+          row.playerName.toLowerCase().includes(searchName.toLowerCase())
+        ),
+    [rows, searchName]
+  );
 
   // 各項目のトップ5を計算
-  const calculateTop5 = () => {
+  const top5Data = useMemo(() => {
     const allRows = filteredRows.filter(row => 
       row.speed || row.spinRate || row.trueSpin || row.spinEff || 
       row.spinDirect || row.verticalBreak || row.horizontalBreak
@@ -114,9 +125,7 @@ export default function Whole({
       verticalBreak: getTop5('verticalBreak'),
       horizontalBreak: getTop5('horizontalBreak'),
     };
-  };
-
-  const top5Data = calculateTop5();
+  }, [filteredRows]);
 
   return (
     <div className="whole-container">
@@ -131,7 +140,7 @@ export default function Whole({
 
         {searchName && (
           <span className="whole-search-result">
-            {t("dataTable.loading")}: {filteredRows.length}件
+            {filteredRows.length} {t("ranking.resultsFound")}
           </span>
         )}
       </div>
@@ -144,15 +153,15 @@ export default function Whole({
         <div className="whole-separate-tables">
           {/* 球速 トップ5 */}
           <div className="whole-individual-table">
-            <h3 className="whole-individual-title">🔥 {t("analysis.speed")} トップ5</h3>
+            <h3 className="whole-individual-title">🔥 {t("analysis.speed")} Top5</h3>
             <div className="whole-top5-table-wrapper">
               <table className="whole-top5-table">
                 <thead>
                   <tr>
-                    <th>順位</th>
-                    <th>選手名</th>
-                    <th>記録</th>
-                    <th>日付</th>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -177,15 +186,15 @@ export default function Whole({
 
           {/* 回転数 トップ5 */}
           <div className="whole-individual-table">
-            <h3 className="whole-individual-title">🌀 {t("analysis.spin")} トップ5</h3>
+            <h3 className="whole-individual-title">🌀 {t("analysis.spin")} Top5</h3>
             <div className="whole-top5-table-wrapper">
               <table className="whole-top5-table">
                 <thead>
                   <tr>
-                    <th>順位</th>
-                    <th>選手名</th>
-                    <th>記録</th>
-                    <th>日付</th>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -210,15 +219,15 @@ export default function Whole({
 
           {/* TRUE SPIN トップ5 */}
           <div className="whole-individual-table">
-            <h3 className="whole-individual-title">⚡ {t("analysis.trueSpin")} トップ5</h3>
+            <h3 className="whole-individual-title">⚡ {t("analysis.trueSpin")} Top5</h3>
             <div className="whole-top5-table-wrapper">
               <table className="whole-top5-table">
                 <thead>
                   <tr>
-                    <th>順位</th>
-                    <th>選手名</th>
-                    <th>記録</th>
-                    <th>日付</th>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -243,15 +252,15 @@ export default function Whole({
 
           {/* SPIN EFF トップ5 */}
           <div className="whole-individual-table">
-            <h3 className="whole-individual-title">📈 {t("analysis.spinEff")} トップ5</h3>
+            <h3 className="whole-individual-title">📈 {t("analysis.spinEff")} Top5</h3>
             <div className="whole-top5-table-wrapper">
               <table className="whole-top5-table">
                 <thead>
                   <tr>
-                    <th>順位</th>
-                    <th>選手名</th>
-                    <th>記録</th>
-                    <th>日付</th>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -276,15 +285,15 @@ export default function Whole({
 
           {/* SPIN DIRECT トップ5 */}
           <div className="whole-individual-table">
-            <h3 className="whole-individual-title">🎯 SPIN DIRECT トップ5</h3>
+            <h3 className="whole-individual-title">🎯 {t("analysis.spinDirect")} Top5</h3>
             <div className="whole-top5-table-wrapper">
               <table className="whole-top5-table">
                 <thead>
                   <tr>
-                    <th>順位</th>
-                    <th>選手名</th>
-                    <th>記録</th>
-                    <th>日付</th>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -309,15 +318,15 @@ export default function Whole({
 
           {/* 縦変化 トップ5 */}
           <div className="whole-individual-table">
-            <h3 className="whole-individual-title">⬆️ {t("analysis.verticalMovement")} トップ5</h3>
+            <h3 className="whole-individual-title">⬆️ {t("analysis.verticalMovement")} Top5</h3>
             <div className="whole-top5-table-wrapper">
               <table className="whole-top5-table">
                 <thead>
                   <tr>
-                    <th>順位</th>
-                    <th>選手名</th>
-                    <th>記録</th>
-                    <th>日付</th>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -342,15 +351,15 @@ export default function Whole({
 
           {/* 横変化 トップ5 */}
           <div className="whole-individual-table">
-            <h3 className="whole-individual-title">↔️ {t("analysis.horizontalMovement")} トップ5</h3>
+            <h3 className="whole-individual-title">↔️ {t("analysis.horizontalMovement")} Top5</h3>
             <div className="whole-top5-table-wrapper">
               <table className="whole-top5-table">
                 <thead>
                   <tr>
-                    <th>順位</th>
-                    <th>選手名</th>
-                    <th>記録</th>
-                    <th>日付</th>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
                   </tr>
                 </thead>
                 <tbody>
