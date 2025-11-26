@@ -24,7 +24,15 @@ export default function Home() {
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
+  const [playerConditions, setPlayerConditions] = useState<{[key: string]: string}>({});
  
+  // コンディションオプション
+  const conditionOptions = [
+    { value: "healthy", label: "健康", color: "#4CAF50", icon: "✓" },
+    { value: "injured", label: "怪我", color: "#F44336", icon: "⚠" },
+    { value: "sick", label: "体調不良", color: "#FF9800", icon: "⚠" }
+  ];
+
   // Fetch players from Firestore
   useEffect(() => {
     const fetchPlayers = async () => {
@@ -102,6 +110,22 @@ export default function Home() {
     router.push(`/player/${playerId}`);
   };
 
+  const handleConditionChange = (playerId: string, condition: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPlayerConditions(prev => ({
+      ...prev,
+      [playerId]: condition
+    }));
+  };
+
+  const getCondition = (playerId: string) => {
+    return playerConditions[playerId] || "healthy";
+  };
+
+  const getConditionInfo = (condition: string) => {
+    return conditionOptions.find(opt => opt.value === condition) || conditionOptions[0];
+  };
+
   return (
     <>
       <Navigation showProfile={true} showHamburger={true} />
@@ -151,58 +175,93 @@ export default function Home() {
             </select>
 
             <div className="filter_button">
-
-            <button onClick={handleFilter}>{t("home.filter")}</button>
+              <button onClick={handleFilter}>{t("home.filter")}</button>
             </div>
             <div className="new_player">
-            <button onClick={handleAddNewPlayer}>{t("home.newPlayer")}</button>
+              <button onClick={handleAddNewPlayer}>{t("home.newPlayer")}</button>
             </div>
           </div>
  
           {/* Player Cards */}
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
-              filteredPlayers.map((player) => (
+              filteredPlayers.map((player) => {
+                const currentCondition = getCondition(player.id);
+                const conditionInfo = getConditionInfo(currentCondition);
                 
-                <div
-  key={player.id}
-  className="player-card"
-  onClick={() => handlePlayerClick(player.id)}
->
-  <div className="player-card-header">
-    <span className="grade-badge">{player.grade}</span>
-  </div>
-  <div className="player-card-body">
-    {player.imageURL && (
-      <Image
-        src={player.imageURL}
-        alt={`${player.name}'s profile`}
-        className="player-photo-circle"
-        width={60}
-        height={60}
-      />
-    )}
-    <h3 className="player-name">{player.name}</h3>
-    <p className="player-stats">{t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}</p>
-    <div className="player-bar">
-      <div className="player-bar-fill" style={{width: '70%'}}></div>
-    </div>
-    <div className="player-details">
-      <p>{t("home.maxSpeed")}: 130/120[km/h]</p>
-      <p>{t("home.condition")}: <span className="condition-check">✓</span> 出場可能</p>
-    </div>
-    <div className="player-tags">
-      <span className="tag tag-blue">{t("home.fastball")}</span>
-      <span className="tag tag-blue">{t("home.leftHanded")}</span>
-      <span className="tag tag-blue">{t("home.straight")}</span>
-      <span className="tag tag-green">{t("home.healthy")}</span>
-    </div>
-  </div>
-  <div className="player-card-footer">
-    {t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}
-  </div>
-</div>
-              ))
+                return (
+                  <div
+                    key={player.id}
+                    className="player-card"
+                    onClick={() => handlePlayerClick(player.id)}
+                  >
+                    <div className="player-card-header">
+                      <span className="grade-badge">{player.grade}</span>
+                    </div>
+                    <div className="player-card-body">
+                      {player.imageURL && (
+                        <Image
+                          src={player.imageURL}
+                          alt={`${player.name}'s profile`}
+                          className="player-photo-circle"
+                          width={60}
+                          height={60}
+                        />
+                      )}
+                      <h3 className="player-name">{player.name}</h3>
+                      <p className="player-stats">{t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}</p>
+                      <div className="player-details">
+                        <p>{t("home.maxSpeed")}: 130/120[km/h]</p>
+                        
+                        {/* コンディション ドロップダウン */}
+                        <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {t("home.condition")}:
+                          <select
+                            value={currentCondition}
+                            onChange={(e) => handleConditionChange(player.id, e.target.value, e as any)}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              border: `2px solid ${conditionInfo.color}`,
+                              backgroundColor: 'white',
+                              color: conditionInfo.color,
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              fontSize: '13px',
+                              outline: 'none'
+                            }}
+                          >
+                            {conditionOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.icon} {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          <span style={{ 
+                            color: conditionInfo.color,
+                            fontWeight: 'bold',
+                            fontSize: '16px'
+                          }}>
+                            {conditionInfo.icon}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="player-tags">
+                        <span className="tag tag-blue">{t("home.fastball")}</span>
+                        <span className="tag tag-blue">{t("home.leftHanded")}</span>
+                        <span className="tag tag-blue">{t("home.straight")}</span>
+                        <span className="tag" style={{ backgroundColor: conditionInfo.color }}>
+                          {conditionInfo.label}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="player-card-footer">
+                      {t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}
+                    </div>
+                  </div>
+                );
+              })
             ) : (
               <p>{t("home.noPlayers")}</p>
             )}
