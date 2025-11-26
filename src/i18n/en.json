@@ -1,3 +1,4 @@
+
 {
   "app.title": "SportsPBL",
   "nav.home": "Home",
@@ -43,7 +44,7 @@
   "player.noRecords": "No records available",
   "player.viewAllData": "View All Data",
   "player.uploadNewData": "Upload New Data",
-  "player.rank": "",
+  "player.rank": "Rank",
   "player.outOf": "out of",
 
   "profile.title": "Profile Page",
@@ -125,6 +126,7 @@
   "analysis.horizontalMovement": "Horizontal Movement",
   "analysis.trueSpin": "TRUE SPIN",
   "analysis.spinEff": "SPIN EFF",
+  "analysis.spinDirect": "SPIN DIRECT",
   "analysis.averageGraph": "Average Records Graph",
   "analysis.bestGraph": "Best Records Graph",
   "analysis.speedOption": "Speed",
@@ -152,6 +154,17 @@
   "analysis.scatterAxisSpin": "Spin",
   "analysis.players": "Players",
   "analysis.monthLabel": "Month",
+
+  "ranking.rank": "Rank",
+  "ranking.playerName": "Player Name",
+  "ranking.record": "Record",
+  "ranking.date": "Date",
+  "ranking.resultsFound": "results found",
+  
+  "table.rank": "Rank",
+  "table.playerName": "Player Name",
+  "table.record": "Record",
+  "table.date": "Date",
 
   "forgotPassword.title": "Forgot Password",
   "forgotPassword.email": "Email Address",
