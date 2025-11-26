@@ -19,4 +19,11 @@ export type SortableField = keyof PlayerData;
 export interface Player {
   id: string;
   name: string;
+  grade: string;
+  height: string;
+  weight: string;
+  throwingHand?: string;  
+  favoritePitch?: string; 
+  creationDate: any;
+  imageURL?: string;
 }
