@@ -13,10 +13,12 @@ import { Player } from "@/types";
 import { formatFirebaseDate } from "@/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// Playerタイプを拡張（得意球種と利き手を追加）
+// Playerタイプを拡張（得意球種と利き手、球速データを追加）
 interface ExtendedPlayer extends Player {
   throwingHand?: string;
   favoritePitch?: string;
+  maxSpeed?: number;
+  recentSpeed?: number;
 }
 
 export default function Home() {
@@ -31,16 +33,68 @@ export default function Home() {
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
  
+  // Helper function to find field value with multiple possible key names
+  const findFieldValue = (record: any, ...possibleKeys: string[]): any => {
+    for (const key of possibleKeys) {
+      if (record[key] !== undefined && record[key] !== null && record[key] !== "") {
+        return record[key];
+      }
+    }
+    return null;
+  };
+
   // Fetch players from Firestore
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
         const playerCollection = collection(db, "players");
         const playerSnapshot = await getDocs(playerCollection);
-        const playerList = playerSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        })) as ExtendedPlayer[];
+        const playerList = await Promise.all(
+          playerSnapshot.docs.map(async (playerDoc) => {
+            const playerData = {
+              id: playerDoc.id,
+              ...playerDoc.data(),
+            } as ExtendedPlayer;
+
+            // Fetch CSV data for this player to get speed statistics
+            try {
+              const csvDataRef = collection(db, "players", playerDoc.id, "csvData");
+              const csvSnapshot = await getDocs(csvDataRef);
+
+              if (!csvSnapshot.empty) {
+                const records = csvSnapshot.docs.map(doc => doc.data());
+
+                // Extract speeds from records
+                const speeds = records.map(r => {
+                  const value = findFieldValue(
+                    r,
+                    "速度(kph)",
+                    "速度",
+                    "releaseSpeed",
+                    "Release Speed",
+                    "speed",
+                    "Speed",
+                    "リリース速度",
+                    "球速",
+                    "RELEASE_SPEED",
+                    "release_speed"
+                  );
+                  const numValue = value ? parseFloat(String(value).replace(/[^\d.-]/g, '')) : 0;
+                  return isNaN(numValue) ? 0 : numValue;
+                }).filter(s => s > 0);
+
+                if (speeds.length > 0) {
+                  playerData.maxSpeed = Math.max(...speeds);
+                  playerData.recentSpeed = speeds[speeds.length - 1]; // Last recorded speed
+                }
+              }
+            } catch (error) {
+              console.error(`Error fetching CSV data for player ${playerDoc.id}:`, error);
+            }
+
+            return playerData;
+          })
+        );
  
         const uniqueNames = Array.from(new Set(playerList.map((player) => player.name)));
         const uniqueGrades = Array.from(new Set(playerList.map((player) => player.grade)));
@@ -215,7 +269,10 @@ export default function Home() {
                       <div className="player-bar-fill" style={{width: '70%'}}></div>
                     </div>
                     <div className="player-details">
-                      <p>{t("home.maxSpeed")}: 130/120[km/h]</p>
+                      <p>
+                        {t("home.maxSpeed")}: {player.maxSpeed ? `${player.maxSpeed.toFixed(1)}` : "-"}/
+                        {player.recentSpeed ? `${player.recentSpeed.toFixed(1)}` : "-"}[km/h]
+                      </p>
                       <p>{t("home.condition")}: <span className="condition-check">✓</span> 出場可能</p>
                     </div>
                     <div className="player-tags">
