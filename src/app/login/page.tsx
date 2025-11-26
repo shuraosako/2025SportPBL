@@ -1,14 +1,20 @@
 "use client";
-
+ 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { signInWithEmailAndPassword, PhoneAuthProvider, RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { useState, useEffect } from "react";
+import { 
+  signInWithEmailAndPassword, 
+  PhoneAuthProvider, 
+  RecaptchaVerifier, 
+  signInWithPhoneNumber,
+  signInWithCredential
+} from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import Navigation from "@/components/layout/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import styles from './login.module.css';
-
+ 
 export default function Login() {
   const router = useRouter();
   const { t } = useLanguage();
@@ -20,73 +26,92 @@ export default function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPhoneSignIn, setShowPhoneSignIn] = useState(false);
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
 
+  // RecaptchaVerifierの初期化
+  useEffect(() => {
+    if (showPhoneSignIn && !recaptchaVerifier) {
+      const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {
+          console.log('reCAPTCHA solved');
+        },
+        'expired-callback': () => {
+          console.warn('reCAPTCHA expired');
+        },
+      });
+      setRecaptchaVerifier(verifier);
+    }
+  }, [showPhoneSignIn, recaptchaVerifier]);
+ 
   const handleLoginClick = async () => {
     setError("");
     setIsLoading(true);
-
+ 
     try {
       if (!showPhoneSignIn) {
+        // メールログイン
         await signInWithEmailAndPassword(auth, email, password);
         router.push("/home");
       } else {
-        const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: (response: any) => {
-            console.log('reCAPTCHA solved');
-          },
-          'expired-callback': () => {
-            console.warn('reCAPTCHA expired');
-          },
-        });
-        await recaptchaVerifier.render();
+        // 電話番号ログイン
+        if (!recaptchaVerifier) {
+          throw new Error("reCAPTCHA not initialized");
+        }
         const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
         setVerificationId(confirmationResult.verificationId);
         alert("OTP sent to your phone number.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Login error:", err);
-      setError("Failed to log in. Please check your credentials or try again.");
+      setError(err.message || "Failed to log in. Please check your credentials or try again.");
     } finally {
       setIsLoading(false);
     }
   };
-
+ 
   const handleVerifyOtpClick = async () => {
     if (!verificationId || !otp) {
-      alert("Please enter the OTP.");
+      setError(t('profile.otp') + "を入力してください");
       return;
     }
-
+ 
+    setIsLoading(true);
+    setError("");
+    
     try {
+      // credentialを作成してサインイン
       const credential = PhoneAuthProvider.credential(verificationId, otp);
+      await signInWithCredential(auth, credential);
       alert("Phone number verified successfully.");
       router.push("/home");
-    } catch (err) {
+    } catch (err: any) {
       console.error("OTP verification error:", err);
-      setError("Failed to verify OTP. Please try again.");
+      setError(err.message || "Failed to verify OTP. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
-
+ 
   return (
     <>
       <Navigation showProfile={false} showHamburger={false} />
-
+ 
       <div className={styles.logunder}>
         <div className={styles.log}>
           <div className={styles.signInToggle}>
             <button type="button" onClick={() => setShowPhoneSignIn(false)}>
-              メールでログイン
+              {t('login.emailLogin')}
             </button>
             <button type="button" onClick={() => setShowPhoneSignIn(true)}>
-              電話番号でログイン
+              {t('login.phoneLogin')}
             </button>
           </div>
-
+ 
           {!showPhoneSignIn && (
             <>
               <div className="inputfield">
-                <label>メールアドレス</label>
+                <label>{t('login.email')}</label>
                 <input
                   type="email"
                   id="mailaddress"
@@ -97,7 +122,7 @@ export default function Login() {
                 />
               </div>
               <div className="inputfield">
-                <label>パスワード</label>
+                <label>{t('login.password')}</label>
                 <input
                   type="password"
                   id="pass"
@@ -109,10 +134,10 @@ export default function Login() {
               </div>
             </>
           )}
-
-          {showPhoneSignIn && (
+ 
+          {showPhoneSignIn && !verificationId && (
             <div className="inputfield">
-              <label>電話番号</label>
+              <label>{t('profile.phoneNumber')}</label>
               <input
                 type="tel"
                 id="phone"
@@ -124,21 +149,23 @@ export default function Login() {
               />
             </div>
           )}
-
+ 
           {error && <div className={styles.error}>{error}</div>}
-
-          <button
-            type="button"
-            onClick={handleLoginClick}
-            disabled={isLoading}
-            className={styles.loginButton}
-          >
-            {isLoading ? 'ログイン中...' : 'ログイン'}
-          </button>
-
+ 
+          {!verificationId && (
+            <button
+              type="button"
+              onClick={handleLoginClick}
+              disabled={isLoading}
+              className={styles.loginButton}
+            >
+              {isLoading ? t('common.loading') : t('login.submit')}
+            </button>
+          )}
+ 
           {verificationId && (
             <div className="inputfield">
-              <label>認証コード</label>
+              <label>{t('profile.otp')}</label>
               <input
                 type="text"
                 id="otp"
@@ -153,23 +180,23 @@ export default function Login() {
                 disabled={isLoading}
                 className={styles.loginButton}
               >
-                認証
+                {isLoading ? t('common.loading') : t('profile.verifyOTP')}
               </button>
             </div>
           )}
-
+ 
           <div className={styles.addition}>
-            <Link href="/forgot_pass">＞パスワードを忘れた方</Link>
+            <Link href="/forgot_pass">＞{t('login.forgotPassword')}</Link>
             <br />
-            <Link href="/New-Account">＞新しいアカウントを作る方</Link>
+            <Link href="/New-Account">＞{t('login.createAccount')}</Link>
           </div>
         </div>
       </div>
-
+ 
       <div className={styles.last}>
         <div className={styles.lastLine}></div>
       </div>
-
+ 
       <div id="recaptcha-container"></div>
     </>
   );

@@ -51,23 +51,36 @@ export default function FilterSection({
   }, []);
 
   const handlePlayerCheckboxChange = (playerId: string) => {
-    if (selectedPlayers.includes(playerId)) {
-      onPlayersSelect(selectedPlayers.filter((id) => id !== playerId));
+    if (currentTab === "individual") {
+      onPlayerSelect(playerId);
+      setIsDropdownOpen(false);
     } else {
-      if (selectedPlayers.length < 5) {
-        onPlayersSelect([...selectedPlayers, playerId]);
+      if (selectedPlayers.includes(playerId)) {
+        onPlayersSelect(selectedPlayers.filter((id) => id !== playerId));
+      } else {
+        if (selectedPlayers.length < 5) {
+          onPlayersSelect([...selectedPlayers, playerId]);
+        }
       }
     }
   };
 
   const getSelectedPlayerNames = () => {
-    if (selectedPlayers.length === 0) {
-      return t("analysis.selectPlayers");
+    if (currentTab === "individual") {
+      if (!selectedPlayer) {
+        return t("analysis.selectPlayer");
+      }
+      const player = players.find((p) => p.id === selectedPlayer);
+      return player?.name || t("analysis.selectPlayer");
+    } else {
+      if (selectedPlayers.length === 0) {
+        return t("analysis.selectPlayers");
+      }
+      const names = selectedPlayers
+        .map((id) => players.find((p) => p.id === id)?.name)
+        .filter(Boolean);
+      return names.join(", ");
     }
-    const names = selectedPlayers
-      .map((id) => players.find((p) => p.id === id)?.name)
-      .filter(Boolean);
-    return names.join(", ");
   };
 
   return (
@@ -108,81 +121,79 @@ export default function FilterSection({
       </div>
 
       {/* Player Selection */}
-      {currentTab === "individual" ? (
-        <div className="player-selection">
-          <label>{t("analysis.selectPlayer")}:</label>
-          <select
-            value={selectedPlayer || ""}
-            onChange={(e) => onPlayerSelect(e.target.value)}
-            className="player-select"
+      <div className="player-selection" ref={dropdownRef}>
+        <label>
+          {currentTab === "individual"
+            ? t("analysis.selectPlayer")
+            : t("analysis.selectPlayers")}:
+        </label>
+        <div className="multi-select-dropdown">
+          <button
+            type="button"
+            className="multi-select-button"
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
           >
-            <option value="">{t("analysis.selectPlayer")}</option>
-            {players.map((player) => (
-              <option key={player.id} value={player.id}>
-                {player.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <div className="player-selection" ref={dropdownRef}>
-          <label>{t("analysis.selectPlayers")}:</label>
-          <div className="multi-select-dropdown">
-            <button
-              type="button"
-              className="multi-select-button"
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            >
-              <span className="selected-text">{getSelectedPlayerNames()}</span>
-              <span className="selected-count">
-                {selectedPlayers.length > 0 && `(${selectedPlayers.length}/5)`}
-              </span>
-              <span className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`}>▼</span>
-            </button>
-            
-            {isDropdownOpen && (
-              <div className="dropdown-menu">
-                <div className="dropdown-header">
-                  <span>{t("analysis.selectPlayers")} (最大5人)</span>
-                  {selectedPlayers.length > 0 && (
-                    <button
-                      type="button"
-                      className="clear-button"
-                      onClick={() => onPlayersSelect([])}
-                    >
-                      クリア
-                    </button>
-                  )}
-                </div>
-                <div className="dropdown-list">
-                  {players.map((player) => (
+            <span className="selected-text">{getSelectedPlayerNames()}</span>
+            <span className="selected-count">
+              {currentTab === "individual"
+                ? ""
+                : selectedPlayers.length > 0 && `(${selectedPlayers.length}/5)`}
+            </span>
+            <span className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`}>▼</span>
+          </button>
+
+          {isDropdownOpen && (
+            <div className="dropdown-menu">
+              <div className="dropdown-header">
+                <span>
+                  {currentTab === "individual"
+                    ? t("analysis.selectPlayer")
+                    : `${t("analysis.selectPlayers")} (最大5人)`}
+                </span>
+                {currentTab !== "individual" && selectedPlayers.length > 0 && (
+                  <button
+                    type="button"
+                    className="clear-button"
+                    onClick={() => onPlayersSelect([])}
+                  >
+                    クリア
+                  </button>
+                )}
+              </div>
+              <div className="dropdown-list">
+                {players.map((player) => {
+                  const isSelected = currentTab === "individual"
+                    ? selectedPlayer === player.id
+                    : selectedPlayers.includes(player.id);
+                  const isDisabled = currentTab !== "individual"
+                    && !selectedPlayers.includes(player.id)
+                    && selectedPlayers.length >= 5;
+
+                  return (
                     <label
                       key={player.id}
                       className={`dropdown-item ${
-                        selectedPlayers.includes(player.id) ? "selected" : ""
+                        isSelected ? "selected" : ""
                       } ${
-                        !selectedPlayers.includes(player.id) && selectedPlayers.length >= 5
-                          ? "disabled"
-                          : ""
+                        isDisabled ? "disabled" : ""
                       }`}
                     >
                       <input
-                        type="checkbox"
-                        checked={selectedPlayers.includes(player.id)}
+                        type={currentTab === "individual" ? "radio" : "checkbox"}
+                        name={currentTab === "individual" ? "player-select" : undefined}
+                        checked={isSelected}
                         onChange={() => handlePlayerCheckboxChange(player.id)}
-                        disabled={
-                          !selectedPlayers.includes(player.id) && selectedPlayers.length >= 5
-                        }
+                        disabled={isDisabled}
                       />
                       <span>{player.name}</span>
                     </label>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-        )}
+      </div>
     </div>
   );
 }

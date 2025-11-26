@@ -57,6 +57,8 @@
   "profile.uploadPhoto": "Upload New Profile Photo",
   "profile.saveChanges": "Save Changes",
   "profile.saving": "Saving...",
+  "profile.accountInfo": "Account Information",
+  "profile.phoneAuth": "Phone Number Authentication",
 
   "login.title": "Login",
   "login.email": "Email Address",
@@ -65,6 +67,10 @@
   "login.noAccount": "Don't have an account?",
   "login.createAccount": "Create Account",
   "login.forgotPassword": "Forgot Password?",
+  "login.emailLogin": "Email Login",
+  "login.phoneLogin": "Phone Login",
+  "login.enterOTP": "Enter verification code",
+  "login.phoneNumberPlaceholder": "+81 90-1234-5678",
 
   "createAccount.title": "Create New Account",
   "createAccount.username": "Username",
@@ -147,6 +153,7 @@
   "analysis.scatterAxisSpeed": "Speed",
   "analysis.scatterAxisSpin": "Spin",
   "analysis.players": "Players",
+  "analysis.monthLabel": "Month",
 
   "ranking.rank": "Rank",
   "ranking.playerName": "Player Name",
