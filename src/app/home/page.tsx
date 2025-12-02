@@ -32,16 +32,14 @@ export default function Home() {
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
+  const [playerConditions, setPlayerConditions] = useState<{[key: string]: string}>({});
  
-  // Helper function to find field value with multiple possible key names
-  const findFieldValue = (record: any, ...possibleKeys: string[]): any => {
-    for (const key of possibleKeys) {
-      if (record[key] !== undefined && record[key] !== null && record[key] !== "") {
-        return record[key];
-      }
-    }
-    return null;
-  };
+  // コンディションオプション
+  const conditionOptions = [
+    { value: "healthy", label: "健康", color: "#4CAF50", icon: "✓" },
+    { value: "injured", label: "怪我", color: "#F44336", icon: "⚠" },
+    { value: "sick", label: "体調不良", color: "#FF9800", icon: "⚠" }
+  ];
 
   // Fetch players from Firestore
   useEffect(() => {
