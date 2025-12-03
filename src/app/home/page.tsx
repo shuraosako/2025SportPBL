@@ -33,13 +33,23 @@ export default function Home() {
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
   const [playerConditions, setPlayerConditions] = useState<{[key: string]: string}>({});
- 
+
   // コンディションオプション
   const conditionOptions = [
     { value: "healthy", label: "健康", color: "#4CAF50", icon: "✓" },
     { value: "injured", label: "怪我", color: "#F44336", icon: "⚠" },
     { value: "sick", label: "体調不良", color: "#FF9800", icon: "⚠" }
   ];
+
+  // Helper function to find field value with multiple possible key names
+  const findFieldValue = (record: any, ...possibleKeys: string[]): any => {
+    for (const key of possibleKeys) {
+      if (record[key] !== undefined && record[key] !== null && record[key] !== "") {
+        return record[key];
+      }
+    }
+    return null;
+  };
 
   // Fetch players from Firestore
   useEffect(() => {
@@ -93,10 +103,10 @@ export default function Home() {
             return playerData;
           })
         );
- 
+
         const uniqueNames = Array.from(new Set(playerList.map((player) => player.name)));
         const uniqueGrades = Array.from(new Set(playerList.map((player) => player.grade)));
- 
+
         setPlayers(playerList);
         setFilteredPlayers(playerList);
         setNames(uniqueNames);
@@ -105,21 +115,21 @@ export default function Home() {
         console.error("Error fetching players:", error);
       }
     };
- 
+
     fetchPlayers();
   }, []);
 
   const handleFilter = () => {
     let filtered = players;
- 
+
     if (searchName) {
       filtered = filtered.filter((player) => player.name.toLowerCase().includes(searchName.toLowerCase()));
     }
- 
+
     if (searchGrade) {
       filtered = filtered.filter((player) => player.grade === searchGrade);
     }
- 
+
     if (selectedDate) {
       const selectedDateString = selectedDate.toLocaleDateString("en-GB");
       filtered = filtered.filter((player) => {
@@ -130,13 +140,13 @@ export default function Home() {
         return false;
       });
     }
- 
+
     setFilteredPlayers(filtered);
   };
- 
+
   const handleNameInputChange = (input: string) => {
     setSearchName(input);
- 
+
     if (input) {
       const suggestions = names.filter((name) =>
         name.toLowerCase().includes(input.toLowerCase())
@@ -146,18 +156,34 @@ export default function Home() {
       setNameSuggestions([]);
     }
   };
- 
+
   const handleNameSelect = (name: string) => {
     setSearchName(name);
     setNameSuggestions([]);
   };
- 
+
   const handleAddNewPlayer = () => {
     router.push("/create_player");
   };
 
   const handlePlayerClick = (playerId: string) => {
     router.push(`/player/${playerId}`);
+  };
+
+  const handleConditionChange = (playerId: string, condition: string, e: React.ChangeEvent<HTMLSelectElement>) => {
+    e.stopPropagation();
+    setPlayerConditions(prev => ({
+      ...prev,
+      [playerId]: condition
+    }));
+  };
+
+  const getCondition = (playerId: string) => {
+    return playerConditions[playerId] || "healthy";
+  };
+
+  const getConditionInfo = (condition: string) => {
+    return conditionOptions.find(opt => opt.value === condition) || conditionOptions[0];
   };
 
   // 利き手の翻訳を取得
@@ -236,63 +262,100 @@ export default function Home() {
               <button onClick={handleAddNewPlayer}>{t("home.newPlayer")}</button>
             </div>
           </div>
- 
+
           {/* Player Cards */}
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
-              filteredPlayers.map((player) => (
-                <div
-                  key={player.id}
-                  className="player-card"
-                  onClick={() => handlePlayerClick(player.id)}
-                >
-                  <div className="player-card-header">
-                    <span className="grade-badge">{player.grade}</span>
-                  </div>
-                  <div className="player-card-body">
-                    {player.imageURL && (
-                      <Image
-                        src={player.imageURL}
-                        alt={`${player.name}'s profile`}
-                        className="player-photo-circle"
-                        width={60}
-                        height={60}
-                      />
-                    )}
-                    <h3 className="player-name">{player.name}</h3>
-                    <p className="player-stats">
-                      {t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}
-                    </p>
-                    <div className="player-bar">
-                      <div className="player-bar-fill" style={{width: '70%'}}></div>
+              filteredPlayers.map((player) => {
+                const currentCondition = getCondition(player.id);
+                const conditionInfo = getConditionInfo(currentCondition);
+
+                return (
+                  <div
+                    key={player.id}
+                    className="player-card"
+                    onClick={() => handlePlayerClick(player.id)}
+                  >
+                    <div className="player-card-header">
+                      <span className="grade-badge">{player.grade}</span>
                     </div>
-                    <div className="player-details">
-                      <p>
-                        {t("home.maxSpeed")}: {player.maxSpeed ? `${player.maxSpeed.toFixed(1)}` : "-"}/
-                        {player.recentSpeed ? `${player.recentSpeed.toFixed(1)}` : "-"}[km/h]
+                    <div className="player-card-body">
+                      {player.imageURL && (
+                        <Image
+                          src={player.imageURL}
+                          alt={`${player.name}'s profile`}
+                          className="player-photo-circle"
+                          width={60}
+                          height={60}
+                        />
+                      )}
+                      <h3 className="player-name">{player.name}</h3>
+                      <p className="player-stats">
+                        {t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}
                       </p>
-                      <p>{t("home.condition")}: <span className="condition-check">✓</span> 出場可能</p>
+                      <div className="player-details">
+                        <p>
+                          {t("home.maxSpeed")}: {player.maxSpeed ? `${player.maxSpeed.toFixed(1)}` : "-"}/
+                          {player.recentSpeed ? `${player.recentSpeed.toFixed(1)}` : "-"}[km/h]
+                        </p>
+
+                        {/* コンディション ドロップダウン */}
+                        <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {t("home.condition")}:
+                          <select
+                            value={currentCondition}
+                            onChange={(e) => handleConditionChange(player.id, e.target.value, e)}
+                            onClick={(e) => e.stopPropagation()}
+                            style={{
+                              padding: '4px 8px',
+                              borderRadius: '4px',
+                              border: `2px solid ${conditionInfo.color}`,
+                              backgroundColor: 'white',
+                              color: conditionInfo.color,
+                              fontWeight: 'bold',
+                              cursor: 'pointer',
+                              fontSize: '13px',
+                              outline: 'none'
+                            }}
+                          >
+                            {conditionOptions.map(option => (
+                              <option key={option.value} value={option.value}>
+                                {option.icon} {option.label}
+                              </option>
+                            ))}
+                          </select>
+                          <span style={{
+                            color: conditionInfo.color,
+                            fontWeight: 'bold',
+                            fontSize: '16px'
+                          }}>
+                            {conditionInfo.icon}
+                          </span>
+                        </p>
+                      </div>
+                      <div className="player-tags">
+                        {player.favoritePitch && (
+                          <span className="tag tag-blue">
+                            {getFavoritePitchLabel(player.favoritePitch)}
+                          </span>
+                        )}
+                        {player.throwingHand && (
+                          <span className="tag tag-blue">
+                            {getThrowingHandLabel(player.throwingHand)}
+                          </span>
+                        )}
+                        <span className="tag tag-blue">{t("home.straight")}</span>
+                        <span className="tag" style={{ backgroundColor: conditionInfo.color }}>
+                          {conditionInfo.label}
+                        </span>
+                      </div>
                     </div>
-                    <div className="player-tags">
-                      {player.favoritePitch && (
-                        <span className="tag tag-blue">
-                          {getFavoritePitchLabel(player.favoritePitch)}
-                        </span>
-                      )}
-                      {player.throwingHand && (
-                        <span className="tag tag-blue">
-                          {getThrowingHandLabel(player.throwingHand)}
-                        </span>
-                      )}
-                      <span className="tag tag-blue">{t("home.straight")}</span>
-                      <span className="tag tag-green">{t("home.healthy")}</span>
+                    <div className="player-card-footer">
+                      {t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}
                     </div>
                   </div>
-                  <div className="player-card-footer">
-                    {t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}
-                  </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <p>{t("home.noPlayers")}</p>
             )}
