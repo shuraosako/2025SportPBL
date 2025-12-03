@@ -85,115 +85,119 @@ export default function FilterSection({
 
   return (
     <div className="filter-section">
-      {/* Date Filter */}
-      <div className="date-filter">
-        <DatePicker
-          selected={startDate}
-          onChange={onStartDateChange}
-          selectsStart
-          startDate={startDate || undefined}
-          endDate={endDate || undefined}
-          placeholderText={t("analysis.startDate")}
-          dateFormat="yyyy/MM/dd"
-          className="date-picker"
-          disabled={showAllPeriod}
-        />
-        <DatePicker
-          selected={endDate}
-          onChange={onEndDateChange}
-          selectsEnd
-          startDate={startDate || undefined}
-          endDate={endDate || undefined}
-          minDate={startDate || undefined}
-          placeholderText={t("analysis.endDate")}
-          dateFormat="yyyy/MM/dd"
-          className="date-picker"
-          disabled={showAllPeriod}
-        />
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={showAllPeriod}
-            onChange={(e) => onShowAllPeriodChange(e.target.checked)}
+      {/* Date Filter - Show for Individual and Comparison tabs only */}
+      {(currentTab === "individual" || currentTab === "comparison") && (
+        <div className="date-filter">
+          <DatePicker
+            selected={startDate}
+            onChange={onStartDateChange}
+            selectsStart
+            startDate={startDate || undefined}
+            endDate={endDate || undefined}
+            placeholderText={t("analysis.startDate")}
+            dateFormat="yyyy/MM/dd"
+            className="date-picker"
+            disabled={showAllPeriod}
           />
-          <span>{t("analysis.allPeriod")}</span>
-        </label>
-      </div>
-
-      {/* Player Selection */}
-      <div className="player-selection" ref={dropdownRef}>
-        <label>
-          {currentTab === "individual"
-            ? t("analysis.selectPlayer")
-            : t("analysis.selectPlayers")}:
-        </label>
-        <div className="multi-select-dropdown">
-          <button
-            type="button"
-            className="multi-select-button"
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          >
-            <span className="selected-text">{getSelectedPlayerNames()}</span>
-            <span className="selected-count">
-              {currentTab === "individual"
-                ? ""
-                : selectedPlayers.length > 0 && `(${selectedPlayers.length}/5)`}
-            </span>
-            <span className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`}>▼</span>
-          </button>
-
-          {isDropdownOpen && (
-            <div className="dropdown-menu">
-              <div className="dropdown-header">
-                <span>
-                  {currentTab === "individual"
-                    ? t("analysis.selectPlayer")
-                    : `${t("analysis.selectPlayers")} (最大5人)`}
-                </span>
-                {currentTab !== "individual" && selectedPlayers.length > 0 && (
-                  <button
-                    type="button"
-                    className="clear-button"
-                    onClick={() => onPlayersSelect([])}
-                  >
-                    クリア
-                  </button>
-                )}
-              </div>
-              <div className="dropdown-list">
-                {players.map((player) => {
-                  const isSelected = currentTab === "individual"
-                    ? selectedPlayer === player.id
-                    : selectedPlayers.includes(player.id);
-                  const isDisabled = currentTab !== "individual"
-                    && !selectedPlayers.includes(player.id)
-                    && selectedPlayers.length >= 5;
-
-                  return (
-                    <label
-                      key={player.id}
-                      className={`dropdown-item ${
-                        isSelected ? "selected" : ""
-                      } ${
-                        isDisabled ? "disabled" : ""
-                      }`}
-                    >
-                      <input
-                        type={currentTab === "individual" ? "radio" : "checkbox"}
-                        name={currentTab === "individual" ? "player-select" : undefined}
-                        checked={isSelected}
-                        onChange={() => handlePlayerCheckboxChange(player.id)}
-                        disabled={isDisabled}
-                      />
-                      <span>{player.name}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          <DatePicker
+            selected={endDate}
+            onChange={onEndDateChange}
+            selectsEnd
+            startDate={startDate || undefined}
+            endDate={endDate || undefined}
+            minDate={startDate || undefined}
+            placeholderText={t("analysis.endDate")}
+            dateFormat="yyyy/MM/dd"
+            className="date-picker"
+            disabled={showAllPeriod}
+          />
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={showAllPeriod}
+              onChange={(e) => onShowAllPeriodChange(e.target.checked)}
+            />
+            <span>{t("analysis.allPeriod")}</span>
+          </label>
         </div>
-      </div>
+      )}
+
+      {/* Player Selection - Show for Individual and Comparison tabs only */}
+      {(currentTab === "individual" || currentTab === "comparison") && (
+        <div className="player-selection" ref={dropdownRef}>
+          <label>
+            {currentTab === "individual"
+              ? t("analysis.selectPlayer")
+              : t("analysis.selectPlayers")}:
+          </label>
+          <div className="multi-select-dropdown">
+            <button
+              type="button"
+              className="multi-select-button"
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            >
+              <span className="selected-text">{getSelectedPlayerNames()}</span>
+              <span className="selected-count">
+                {currentTab === "individual"
+                  ? ""
+                  : selectedPlayers.length > 0 && `(${selectedPlayers.length}/5)`}
+              </span>
+              <span className={`dropdown-arrow ${isDropdownOpen ? "open" : ""}`}>▼</span>
+            </button>
+
+            {isDropdownOpen && (
+              <div className="dropdown-menu">
+                <div className="dropdown-header">
+                  <span>
+                    {currentTab === "individual"
+                      ? t("analysis.selectPlayer")
+                      : `${t("analysis.selectPlayers")} (最大5人)`}
+                  </span>
+                  {currentTab !== "individual" && selectedPlayers.length > 0 && (
+                    <button
+                      type="button"
+                      className="clear-button"
+                      onClick={() => onPlayersSelect([])}
+                    >
+                      クリア
+                    </button>
+                  )}
+                </div>
+                <div className="dropdown-list">
+                  {players.map((player) => {
+                    const isSelected = currentTab === "individual"
+                      ? selectedPlayer === player.id
+                      : selectedPlayers.includes(player.id);
+                    const isDisabled = currentTab !== "individual"
+                      && !selectedPlayers.includes(player.id)
+                      && selectedPlayers.length >= 5;
+
+                    return (
+                      <label
+                        key={player.id}
+                        className={`dropdown-item ${
+                          isSelected ? "selected" : ""
+                        } ${
+                          isDisabled ? "disabled" : ""
+                        }`}
+                      >
+                        <input
+                          type={currentTab === "individual" ? "radio" : "checkbox"}
+                          name={currentTab === "individual" ? "player-select" : undefined}
+                          checked={isSelected}
+                          onChange={() => handlePlayerCheckboxChange(player.id)}
+                          disabled={isDisabled}
+                        />
+                        <span>{player.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
