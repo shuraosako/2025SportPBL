@@ -340,20 +340,6 @@ export default function IndividualAnalysis({
                 </div>
               ))}
 
-              {/* ゾーンラベル */}
-              <div className="scatterZoneLabel" style={{ top: '15%', left: '15%' }}>
-                {language === 'ja' ? '低速低回転' : 'Low Speed Low Spin'}
-              </div>
-              <div className="scatterZoneLabel" style={{ top: '15%', right: '15%' }}>
-                {language === 'ja' ? '高速低回転' : 'High Speed Low Spin'}
-              </div>
-              <div className="scatterZoneLabel" style={{ bottom: '15%', left: '15%' }}>
-                {language === 'ja' ? '低速高回転' : 'Low Speed High Spin'}
-              </div>
-              <div className="scatterZoneLabel" style={{ bottom: '15%', right: '15%' }}>
-                {language === 'ja' ? '高速高回転' : 'High Speed High Spin'}
-              </div>
-
               {/* トレンドライン */}
               <div
                 className="scatterTrendLine"
