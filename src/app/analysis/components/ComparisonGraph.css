@@ -1,0 +1,82 @@
+/* メインコンテナ */
+.comparison-container {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+/* プレイヤーアバターセクション */
+.player-avatars-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 24px;
+}
+
+.player-avatars-title {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.player-avatars-list {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.player-avatar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-avatar-circle {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border-width: 3px;
+  border-style: solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.player-avatar-name {
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* バーチャートコンテナ */
+.bar-chart-container {
+  flex: 1;
+  background-color: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+}
+
+/* レーダーチャートコンテナ */
+.radar-chart-container {
+  background-color: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  margin-bottom: 32px;
+}
+
+.radar-chart-title {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  font-weight: bold;
+}

@@ -1,0 +1,131 @@
+/* 既存のCSSに以下を追加 */
+
+/* 項目別表示用コンテナ */
+.whole-separate-tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+/* 個別テーブルコンテナ */
+.whole-individual-table {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.whole-individual-table:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 個別テーブルのタイトル */
+.whole-individual-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid #2563eb;
+}
+
+/* 記録値のスタイル */
+.whole-record-value {
+  font-weight: bold;
+  font-size: 16px;
+  color: #2563eb;
+}
+
+/* 日付セル */
+.whole-date-cell {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .whole-separate-tables {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .whole-individual-table {
+    padding: 16px;
+  }
+
+  .whole-individual-title {
+    font-size: 18px;
+  }
+
+  .whole-record-value {
+    font/* 既存のCSSに以下を追加 */
+
+/* 項目別表示用コンテナ */
+.whole-separate-tables {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+/* 個別テーブルコンテナ */
+.whole-individual-table {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.whole-individual-table:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 個別テーブルのタイトル */
+.whole-individual-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #111827;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid #2563eb;
+}
+
+/* 記録値のスタイル */
+.whole-record-value {
+  font-weight: bold;
+  font-size: 16px;
+  color: #2563eb;
+}
+
+/* 日付セル */
+.whole-date-cell {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .whole-separate-tables {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .whole-individual-table {
+    padding: 16px;
+  }
+
+  .whole-individual-title {
+    font-size: 18px;
+  }
+
+  .whole-record-value {
+    font-size: 14px;
+  }
+}-size: 14px;
+  }
+}

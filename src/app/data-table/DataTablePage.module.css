@@ -1,60 +1,151 @@
 .container {
-  max-width: 80%;
-  margin: 0 auto;
-  padding: 2rem;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 95%;
+  margin: 84px auto 20px;
+  padding: 20px;
+  min-height: calc(100vh - 104px);
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 30px;
+  color: white;
+  margin-bottom: 24px;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
 }
 
 .heading {
-  text-align: center;
   font-size: 2rem;
-  color: #333;
-  margin-bottom: 1rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.info {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.recordCount {
+  background-color: rgba(255, 255, 255, 0.2);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .message {
   text-align: center;
   font-size: 1.2rem;
   color: #666;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 84px;
 }
 
 .tableContainer {
   overflow-x: auto;
-  margin-top: 1.5rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff;
+  min-width: 800px;
 }
 
 .table th,
 .table td {
-  border: 1px solid #ddd;
-  padding: 0.8rem;
+  padding: 14px 16px;
   text-align: left;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .table th {
-  background-color: #f1f1f1;
-  font-weight: bold;
-  color: #333;
+  background-color: #667eea;
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  white-space: nowrap;
 }
 
-.table tr:nth-child(even) {
-  background-color: #f9f9f9;
+.table tbody tr {
+  transition: background-color 0.2s ease;
 }
 
-.table tr:hover {
-  background-color: #f1f1f1;
-  cursor: default;
+.table tbody tr:hover {
+  background-color: #f5f7ff;
 }
 
 .table td {
-  color: #555;
-  white-space: nowrap; /* Prevent cell content from wrapping */
+  color: #333;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+    padding: 12px;
+    margin-top: 70px;
+  }
+
+  .header {
+    padding: 20px;
+  }
+
+  .heading {
+    font-size: 1.5rem;
+  }
+
+  .info {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .recordCount {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+  }
+
+  .tableContainer {
+    border-radius: 8px;
+  }
+
+  .table th,
+  .table td {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .heading {
+    font-size: 1.3rem;
+  }
+
+  .table {
+    min-width: 600px;
+  }
+
+  .table th,
+  .table td {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
 }

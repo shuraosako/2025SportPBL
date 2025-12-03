@@ -4,42 +4,81 @@
   padding: 20px;
 }
 
-.gridLayout {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+.mainLayout {
   max-width: 1400px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.card {
+/* 上段: グラフエリア */
+.graphRow {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* 中段: 3つのカードエリア */
+.cardsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* グラフカード */
+.chartCard {
   background: white;
   border-radius: 16px;
   padding: 30px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.cardTitle {
-  font-size: 18px;
+.chartTitle {
+  font-size: 16px;
   margin-bottom: 20px;
+  color: #666;
+  font-weight: normal;
+}
+
+/* 数値表示カード */
+.valueCard {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.valueTitle {
+  font-size: 20px;
+  margin-bottom: 10px;
   color: #333;
-  font-weight: bold;
+  font-weight: normal;
+}
+
+.dateText {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 10px;
 }
 
 .speedValue {
   font-size: 48px;
   font-weight: bold;
-  color: #667eea;
-  margin-bottom: 30px;
+  color: #e74c3c;
 }
 
 .spinValue {
-  font-size: 48px;
+  font-size: 72px;
   font-weight: bold;
-  color: #e74c3c;
-  margin-bottom: 30px;
+  color: #667eea;
 }
 
+/* ストライク率カード */
 .strikeCard {
   background: white;
   border-radius: 16px;
@@ -55,7 +94,10 @@
   font-size: 18px;
   margin-bottom: 30px;
   color: #333;
-  font-weight: bold;
+  font-weight: normal;
+  background: #ead788;
+  padding: 8px 20px;
+  border-radius: 8px;
 }
 
 .circleContainer {
@@ -75,37 +117,160 @@
   transform: translate(-50%, -50%);
   font-size: 48px;
   font-weight: bold;
-  color: #f1c40f;
-}
-
-.scatterHeader {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 30px;
-}
-
-.scatterTitle {
-  font-size: 18px;
   color: #333;
-  font-weight: bold;
+}
+
+/* 散布図カード */
+.scatterCard {
+  background: white;
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 .scatterPlot {
   position: relative;
-  width: 100%;
-  height: 280px;
-  border: 2px solid #f0f0f0;
+  width: calc(100% - 80px);
+  height: 350px;
+  border: 2px solid #333;
   border-radius: 8px;
-  background: #fafafa;
+  background: white;
+  margin-left: 60px;
+  margin-top: 10px;
+  margin-bottom: 40px;
 }
 
+.scatterAxisLabel {
+  position: absolute;
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+}
+
+.scatterAxisLabelBottom {
+  bottom: -25px;
+  right: 10px;
+}
+
+.scatterAxisLabelLeft {
+  top: 10px;
+  left: -60px;
+  writing-mode: vertical-rl;
+}
+
+/* グリッド線 */
+.scatterGridLine {
+  position: absolute;
+  background: #e0e0e0;
+}
+
+.scatterGridLineVertical {
+  width: 1px;
+  height: 100%;
+  top: 0;
+}
+
+.scatterGridLineHorizontal {
+  height: 1px;
+  width: 100%;
+  left: 0;
+}
+
+/* 軸ラベル */
+.scatterAxisTick {
+  position: absolute;
+  font-size: 11px;
+  color: #666;
+}
+
+.scatterAxisTickX {
+  bottom: -20px;
+  transform: translateX(-50%);
+}
+
+.scatterAxisTickY {
+  left: -45px;
+  transform: translateY(-50%);
+  text-align: right;
+  width: 40px;
+}
+
+/* ゾーンラベル */
+.scatterZoneLabel {
+  position: absolute;
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+/* トレンドライン */
+.scatterTrendLine {
+  position: absolute;
+  height: 2px;
+  background: rgba(102, 126, 234, 0.5);
+  transform-origin: left center;
+}
+
+/* 散布図の点 */
 .scatterDot {
   position: absolute;
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #22e44cff;
   transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.scatterDot:hover {
+  width: 16px;
+  height: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+}
+
+/* ツールチップ */
+.scatterTooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 100;
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+}
+
+.scatterTooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(0, 0, 0, 0.85);
+}
+
+.scatterSize {
+  position: absolute;
+  bottom: -45px;
+  right: 10px;
+  font-size: 14px;
+  color: white;
+  background: #00a8ff;
+  padding: 5px 15px;
+  border-radius: 4px;
 }
 
 .noDataContainer {

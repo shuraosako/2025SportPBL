@@ -9,6 +9,7 @@ import Navigation from "@/components/layout/Navigation";
 import FilterSection from "./components/FilterSection";
 import IndividualAnalysis from "./components/IndividualAnalysis";
 import ComparisonGraph from "./components/ComparisonGraph";
+import Whole from "./components/Whole";
 import { Player, PlayerData } from "./types";
 import { mapRawDataToPlayerData } from "./utils/dataHelpers";
 import "./analysis.css";
@@ -161,10 +162,10 @@ export default function AnalysisPage() {
           {/* Graph Display */}
           <div className="graphs-container">
             {currentTab === "whole" && (
-              <div>
-                {/* ここに全体グラフのコンポーネントを追加 */}
-                <p>全体グラフ</p>
-              </div>
+              <Whole
+                players={players}
+                playerData={filteredPlayerData}
+              />
             )}
 
             {currentTab === "individual" && (
@@ -182,6 +183,8 @@ export default function AnalysisPage() {
                 selectedPlayers={selectedPlayers}
               />
             )}
+
+            
           </div>
         </div>
       </div>

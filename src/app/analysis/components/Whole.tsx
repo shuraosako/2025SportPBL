@@ -1,21 +1,39 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { PlayerData, Player } from "../types";
-import { useState } from "react";
+import "./Whole.css";
 
-const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"];
+interface Player {
+  id: string;
+  name: string;
+  nameEn?: string; // 英語名を追加
+}
+
+interface PlayerData {
+  id: string;
+  date: string;
+  speed: number;
+  spin: number;
+  trueSpin?: number;
+  spinEff?: number;
+  spinDirection?: number;
+  verticalMovement?: number;
+  horizontalMovement?: number;
+  rating?: string;
+}
 
 interface WholeProps {
   players: Player[];
   playerData: PlayerData[];
-  onSaveData?: (data: any[]) => void; // 保存用コールバック
+  onSaveData?: (data: any[]) => void;
 }
 
 interface InputRow {
   id: string;
   playerId: string;
   playerName: string;
+  date: string;
   speed: string;
   spinRate: string;
   trueSpin: string;
@@ -25,295 +43,346 @@ interface InputRow {
   horizontalBreak: string;
   rating: string;
   isNew: boolean;
+  isExisting: boolean;
 }
 
 export default function Whole({
-  players,
-  playerData,
+  players = [],
+  playerData = [],
   onSaveData,
 }: WholeProps) {
-  const { t } = useLanguage();
-  
-  const [rows, setRows] = useState<InputRow[]>([]);
+  const { t, language } = useLanguage(); // languageを追加
+  const [searchName, setSearchName] = useState<string>("");
 
-  // 新規行を追加
-  const addNewRow = () => {
-    const newRow: InputRow = {
-      id: `new-${Date.now()}`,
-      playerId: "",
-      playerName: "",
-      speed: "",
-      spinRate: "",
-      trueSpin: "",
-      spinEff: "",
-      spinDirect: "",
-      verticalBreak: "",
-      horizontalBreak: "",
-      rating: "",
-      isNew: true,
+  // 既存データを表示用に変換
+  const rows: InputRow[] = useMemo(() => 
+    playerData.map((data, index) => {
+      const player = players.find(p => p.id === data.id);
+      // 言語に応じて名前を選択
+      const displayName = language === 'en' && player?.nameEn 
+        ? player.nameEn 
+        : player?.name || t("player.notFound");
+      
+      return {
+        id: `existing-data-${index}`,
+        playerId: data.id,
+        playerName: displayName,
+        date: data.date,
+        speed: data.speed.toString(),
+        spinRate: data.spin.toString(),
+        trueSpin: data.trueSpin?.toString() || "",
+        spinEff: data.spinEff?.toString() || "",
+        spinDirect: data.spinDirection?.toString() || "",
+        verticalBreak: data.verticalMovement?.toString() || "",
+        horizontalBreak: data.horizontalMovement?.toString() || "",
+        rating: data.rating || "",
+        isNew: false,
+        isExisting: true,
+      };
+    }), [playerData, players, t, language]
+  );
+
+  // 名前で検索してフィルタリング
+  const filteredRows = useMemo(() => 
+    searchName.trim() === ""
+      ? rows
+      : rows.filter(row => 
+          row.playerName.toLowerCase().includes(searchName.toLowerCase())
+        ),
+    [rows, searchName]
+  );
+
+  // 各項目のトップ5を計算
+  const top5Data = useMemo(() => {
+    const allRows = filteredRows.filter(row => 
+      row.speed || row.spinRate || row.trueSpin || row.spinEff || 
+      row.spinDirect || row.verticalBreak || row.horizontalBreak
+    );
+
+    const getTop5 = (field: keyof InputRow, isNumeric: boolean = true) => {
+      return allRows
+        .filter(row => row[field] && row[field] !== "")
+        .map(row => ({
+          playerName: row.playerName,
+          date: row.date,
+          value: isNumeric ? parseFloat(row[field] as string) : row[field]
+        }))
+        .sort((a, b) => {
+          if (isNumeric) {
+            return (b.value as number) - (a.value as number);
+          }
+          return 0;
+        })
+        .slice(0, 5);
     };
-    setRows([...rows, newRow]);
-  };
 
-  // 既存プレイヤーの行を追加
-  const addExistingPlayerRow = (playerId: string) => {
-    const player = players.find(p => p.id === playerId);
-    if (!player) return;
-
-    const newRow: InputRow = {
-      id: `existing-${Date.now()}`,
-      playerId: player.id,
-      playerName: player.name,
-      speed: "",
-      spinRate: "",
-      trueSpin: "",
-      spinEff: "",
-      spinDirect: "",
-      verticalBreak: "",
-      horizontalBreak: "",
-      rating: "",
-      isNew: false,
+    return {
+      speed: getTop5('speed'),
+      spinRate: getTop5('spinRate'),
+      trueSpin: getTop5('trueSpin'),
+      spinEff: getTop5('spinEff'),
+      spinDirect: getTop5('spinDirect'),
+      verticalBreak: getTop5('verticalBreak'),
+      horizontalBreak: getTop5('horizontalBreak'),
     };
-    setRows([...rows, newRow]);
-  };
-
-  // 行を削除
-  const removeRow = (id: string) => {
-    setRows(rows.filter(row => row.id !== id));
-  };
-
-  // 入力値を更新
-  const updateRow = (id: string, field: keyof InputRow, value: string) => {
-    setRows(rows.map(row => 
-      row.id === id ? { ...row, [field]: value } : row
-    ));
-  };
-
-  // データを保存
-  const handleSave = () => {
-    if (onSaveData) {
-      onSaveData(rows);
-    }
-    console.log("保存データ:", rows);
-  };
+  }, [filteredRows]);
 
   return (
-    <div className="graph-section">
-      <div style={{ marginBottom: '16px', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-        <button
-          onClick={addNewRow}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#2563eb',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontWeight: '500',
-          }}
-        >
-          新規プレイヤー追加
-        </button>
+    <div className="whole-container">
+      <div className="whole-controls">
+        <input
+          type="text"
+          placeholder={t("home.searchByName")}
+          value={searchName}
+          onChange={(e) => setSearchName(e.target.value)}
+          className="whole-search-input"
+        />
 
-        <select
-          onChange={(e) => {
-            if (e.target.value) {
-              addExistingPlayerRow(e.target.value);
-              e.target.value = "";
-            }
-          }}
-          style={{
-            padding: '8px 16px',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          <option value="">既存プレイヤーを選択</option>
-          {players.map(player => (
-            <option key={player.id} value={player.id}>
-              {player.name}
-            </option>
-          ))}
-        </select>
-
-        {rows.length > 0 && (
-          <button
-            onClick={handleSave}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: '500',
-              marginLeft: 'auto',
-            }}
-          >
-            保存
-          </button>
+        {searchName && (
+          <span className="whole-search-result">
+            {filteredRows.length} {t("ranking.resultsFound")}
+          </span>
         )}
       </div>
 
-      {rows.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#6b7280', padding: '20px' }}>
-          プレイヤーを追加してデータを入力してください
+      {filteredRows.length === 0 ? (
+        <p className="whole-no-data">
+          {searchName ? t("home.noPlayers") : t("dataTable.noData")}
         </p>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{
-            width: '100%',
-            borderCollapse: 'collapse',
-            backgroundColor: 'white',
-            fontSize: '14px'
-          }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f3f4f6', borderBottom: '2px solid #d1d5db' }}>
-                <th style={headerStyle}>選手名</th>
-                <th style={headerStyle}>球速</th>
-                <th style={headerStyle}>回転数</th>
-                <th style={headerStyle}>TRUE SPIN</th>
-                <th style={headerStyle}>SPIN EFF.</th>
-                <th style={headerStyle}>SPIN DIRECT</th>
-                <th style={headerStyle}>縦の変化量</th>
-                <th style={headerStyle}>横の変化量</th>
-                <th style={headerStyle}>評価</th>
-                <th style={headerStyle}>操作</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, index) => (
-                <tr 
-                  key={row.id}
-                  style={{
-                    borderBottom: '1px solid #e5e7eb',
-                    backgroundColor: index % 2 === 0 ? 'white' : '#f9fafb'
-                  }}
-                >
-                  <td style={cellStyle}>
-                    {row.isNew ? (
-                      <input
-                        type="text"
-                        value={row.playerName}
-                        onChange={(e) => updateRow(row.id, 'playerName', e.target.value)}
-                        placeholder="名前を入力"
-                        style={inputStyle}
-                      />
-                    ) : (
-                      <span>{row.playerName}</span>
-                    )}
-                  </td>
-                  <td style={cellStyle}>
-                    <input
-                      type="number"
-                      value={row.speed}
-                      onChange={(e) => updateRow(row.id, 'speed', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <input
-                      type="number"
-                      value={row.spinRate}
-                      onChange={(e) => updateRow(row.id, 'spinRate', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <input
-                      type="number"
-                      value={row.trueSpin}
-                      onChange={(e) => updateRow(row.id, 'trueSpin', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <input
-                      type="number"
-                      value={row.spinEff}
-                      onChange={(e) => updateRow(row.id, 'spinEff', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <input
-                      type="number"
-                      value={row.spinDirect}
-                      onChange={(e) => updateRow(row.id, 'spinDirect', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <input
-                      type="number"
-                      value={row.verticalBreak}
-                      onChange={(e) => updateRow(row.id, 'verticalBreak', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <input
-                      type="number"
-                      value={row.horizontalBreak}
-                      onChange={(e) => updateRow(row.id, 'horizontalBreak', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <input
-                      type="text"
-                      value={row.rating}
-                      onChange={(e) => updateRow(row.id, 'rating', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </td>
-                  <td style={cellStyle}>
-                    <button
-                      onClick={() => removeRow(row.id)}
-                      style={{
-                        padding: '4px 8px',
-                        backgroundColor: '#ef4444',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                      }}
-                    >
-                      削除
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="whole-separate-tables">
+          {/* 球速 トップ5 */}
+          <div className="whole-individual-table">
+            <h3 className="whole-individual-title">🔥 {t("analysis.speed")} Top5</h3>
+            <div className="whole-top5-table-wrapper">
+              <table className="whole-top5-table">
+                <thead>
+                  <tr>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <tr key={index}>
+                      <td className="whole-top5-rank-cell">
+                        <span className={`whole-top5-rank whole-top5-rank-${index + 1}`}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td>{top5Data.speed[index]?.playerName || '-'}</td>
+                      <td className="whole-record-value">
+                        {top5Data.speed[index] ? `${top5Data.speed[index].value} km/h` : '-'}
+                      </td>
+                      <td className="whole-date-cell">{top5Data.speed[index]?.date || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 回転数 トップ5 */}
+          <div className="whole-individual-table">
+            <h3 className="whole-individual-title">🌀 {t("analysis.spin")} Top5</h3>
+            <div className="whole-top5-table-wrapper">
+              <table className="whole-top5-table">
+                <thead>
+                  <tr>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <tr key={index}>
+                      <td className="whole-top5-rank-cell">
+                        <span className={`whole-top5-rank whole-top5-rank-${index + 1}`}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td>{top5Data.spinRate[index]?.playerName || '-'}</td>
+                      <td className="whole-record-value">
+                        {top5Data.spinRate[index] ? `${top5Data.spinRate[index].value} rpm` : '-'}
+                      </td>
+                      <td className="whole-date-cell">{top5Data.spinRate[index]?.date || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* TRUE SPIN トップ5 */}
+          <div className="whole-individual-table">
+            <h3 className="whole-individual-title">⚡ {t("analysis.trueSpin")} Top5</h3>
+            <div className="whole-top5-table-wrapper">
+              <table className="whole-top5-table">
+                <thead>
+                  <tr>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <tr key={index}>
+                      <td className="whole-top5-rank-cell">
+                        <span className={`whole-top5-rank whole-top5-rank-${index + 1}`}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td>{top5Data.trueSpin[index]?.playerName || '-'}</td>
+                      <td className="whole-record-value">
+                        {top5Data.trueSpin[index] ? `${top5Data.trueSpin[index].value} rpm` : '-'}
+                      </td>
+                      <td className="whole-date-cell">{top5Data.trueSpin[index]?.date || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* SPIN EFF トップ5 */}
+          <div className="whole-individual-table">
+            <h3 className="whole-individual-title">📈 {t("analysis.spinEff")} Top5</h3>
+            <div className="whole-top5-table-wrapper">
+              <table className="whole-top5-table">
+                <thead>
+                  <tr>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <tr key={index}>
+                      <td className="whole-top5-rank-cell">
+                        <span className={`whole-top5-rank whole-top5-rank-${index + 1}`}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td>{top5Data.spinEff[index]?.playerName || '-'}</td>
+                      <td className="whole-record-value">
+                        {top5Data.spinEff[index] ? `${top5Data.spinEff[index].value}%` : '-'}
+                      </td>
+                      <td className="whole-date-cell">{top5Data.spinEff[index]?.date || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* SPIN DIRECT トップ5 */}
+          <div className="whole-individual-table">
+            <h3 className="whole-individual-title">🎯 {t("analysis.spinDirect")} Top5</h3>
+            <div className="whole-top5-table-wrapper">
+              <table className="whole-top5-table">
+                <thead>
+                  <tr>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <tr key={index}>
+                      <td className="whole-top5-rank-cell">
+                        <span className={`whole-top5-rank whole-top5-rank-${index + 1}`}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td>{top5Data.spinDirect[index]?.playerName || '-'}</td>
+                      <td className="whole-record-value">
+                        {top5Data.spinDirect[index] ? `${top5Data.spinDirect[index].value}°` : '-'}
+                      </td>
+                      <td className="whole-date-cell">{top5Data.spinDirect[index]?.date || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 縦変化 トップ5 */}
+          <div className="whole-individual-table">
+            <h3 className="whole-individual-title">⬆️ {t("analysis.verticalMovement")} Top5</h3>
+            <div className="whole-top5-table-wrapper">
+              <table className="whole-top5-table">
+                <thead>
+                  <tr>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <tr key={index}>
+                      <td className="whole-top5-rank-cell">
+                        <span className={`whole-top5-rank whole-top5-rank-${index + 1}`}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td>{top5Data.verticalBreak[index]?.playerName || '-'}</td>
+                      <td className="whole-record-value">
+                        {top5Data.verticalBreak[index] ? `${top5Data.verticalBreak[index].value} cm` : '-'}
+                      </td>
+                      <td className="whole-date-cell">{top5Data.verticalBreak[index]?.date || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 横変化 トップ5 */}
+          <div className="whole-individual-table">
+            <h3 className="whole-individual-title">↔️ {t("analysis.horizontalMovement")} Top5</h3>
+            <div className="whole-top5-table-wrapper">
+              <table className="whole-top5-table">
+                <thead>
+                  <tr>
+                    <th>{t("ranking.rank")}</th>
+                    <th>{t("ranking.playerName")}</th>
+                    <th>{t("ranking.record")}</th>
+                    <th>{t("ranking.date")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[0, 1, 2, 3, 4].map((index) => (
+                    <tr key={index}>
+                      <td className="whole-top5-rank-cell">
+                        <span className={`whole-top5-rank whole-top5-rank-${index + 1}`}>
+                          {index + 1}
+                        </span>
+                      </td>
+                      <td>{top5Data.horizontalBreak[index]?.playerName || '-'}</td>
+                      <td className="whole-record-value">
+                        {top5Data.horizontalBreak[index] ? `${top5Data.horizontalBreak[index].value} cm` : '-'}
+                      </td>
+                      <td className="whole-date-cell">{top5Data.horizontalBreak[index]?.date || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       )}
     </div>
   );
 }
-
-const headerStyle: React.CSSProperties = {
-  padding: '12px 8px',
-  textAlign: 'center',
-  fontWeight: '600',
-  color: '#374151',
-  borderRight: '1px solid #d1d5db',
-};
-
-const cellStyle: React.CSSProperties = {
-  padding: '10px 8px',
-  textAlign: 'center',
-  borderRight: '1px solid #e5e7eb',
-  color: '#111827',
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '6px 8px',
-  border: '1px solid #d1d5db',
-  borderRadius: '4px',
-  fontSize: '14px',
-  textAlign: 'center',
-};
