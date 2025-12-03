@@ -17,9 +17,9 @@ interface PlayerData {
   spin: number;
   trueSpin?: number;
   spinEff?: number;
-  spinDirect?: number;
-  verticalBreak?: number;
-  horizontalBreak?: number;
+  spinDirection?: number;
+  verticalMovement?: number;
+  horizontalMovement?: number;
   rating?: string;
 }
 
@@ -72,9 +72,9 @@ export default function Whole({
         spinRate: data.spin.toString(),
         trueSpin: data.trueSpin?.toString() || "",
         spinEff: data.spinEff?.toString() || "",
-        spinDirect: data.spinDirect?.toString() || "",
-        verticalBreak: data.verticalBreak?.toString() || "",
-        horizontalBreak: data.horizontalBreak?.toString() || "",
+        spinDirect: data.spinDirection?.toString() || "",
+        verticalBreak: data.verticalMovement?.toString() || "",
+        horizontalBreak: data.horizontalMovement?.toString() || "",
         rating: data.rating || "",
         isNew: false,
         isExisting: true,
