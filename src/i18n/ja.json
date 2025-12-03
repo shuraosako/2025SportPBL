@@ -141,8 +141,8 @@
   "analysis.startDate": "開始日",
   "analysis.endDate": "終了日",
   "analysis.applyFilter": "フィルターを適用",
-  "analysis.tabs.individual": "個別選手分析",
-  "analysis.tabs.comparison": "複数選手比較",
+  "analysis.tabs.individual": "個人データ",
+  "analysis.tabs.comparison": "比較",
   "analysis.tabs.overall": "全体傾向",
   "analysis.tabs.whole": "全体",
   "analysis.speedChart": "球速の推移",
@@ -193,11 +193,6 @@
   "analysis.scatterAxisSpin": "回転数",
   "analysis.monthLabel": "月",
   "analysis.players": "選手名",
-  
-  "table.rank": "順位",
-  "table.playerName": "選手名",
-  "table.record": "記録",
-  "table.date": "日付",
 
   "forgotPassword.title": "パスワードをお忘れの方",
   "forgotPassword.email": "メールアドレス",
