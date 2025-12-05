@@ -39,9 +39,15 @@ cd sports-pbl
 npm install
 ```
 
-### 3. Environment Variables
-Create an `.env.local` file in the project root and set up the required environment variables.
-Please refer to the team documentation for the necessary environment variables.
+### 3. Environment Variables (Optional)
+The application comes with default Firebase configuration for development purposes.
+If you need to use your own Firebase project, create an `.env.local` file in the project root:
+
+```bash
+cp .env.example .env.local
+```
+
+Then edit `.env.local` with your Firebase credentials. If you don't create this file, the application will use the default development configuration.
 
 ### 4. Start Development Server
 ```bash
