@@ -47,23 +47,24 @@
 
 /* Profile Content Layout */
 .profile-content {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 32px;
-  max-width: 1200px;
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 24px;
+  width: 100%;
+  max-width: 1500px;
   margin: 0 auto;
-  flex-wrap: nowrap;
 }
 
 .profile-sidebar {
-  width: 320px;
-  flex-shrink: 0;
+  width: 100%;
 }
 
 .profile-main {
-  flex: 1;
-  max-width: none;
+  width: 580px;
+}
+
+.profile-main-right {
+  width: 100%;
 }
 
 /* Left Sidebar - Profile Image */
@@ -188,6 +189,7 @@
   width: 20px;
   height: 20px;
   color: #91DCDC;
+  flex-shrink: 0;
 }
 
 .stat-label {
@@ -198,6 +200,9 @@
 .stat-value {
   color: #333;
   font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+  font-size: 0.85rem;
 }
 
 /* Right Main Content */
@@ -267,37 +272,6 @@
   color: #999;
 }
 
-/* Textarea */
-.form-textarea {
-  width: 100%;
-  padding: 12px 16px;
-  font-size: 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  min-height: 100px;
-  resize: vertical;
-  font-family: inherit;
-}
-
-.form-textarea:focus {
-  outline: none;
-  border-color: #91DCDC;
-  box-shadow: 0 0 0 3px rgba(145, 220, 220, 0.1);
-}
-
-.form-textarea:hover {
-  border-color: #91DCDC;
-}
-
-.char-count {
-  text-align: right;
-  font-size: 0.8rem;
-  color: #999;
-  margin-top: 4px;
-}
-
 /* Password Input with Toggle */
 .password-input-wrapper {
   position: relative;
@@ -332,64 +306,6 @@
 
 .input-button-group .form-input {
   flex: 1;
-}
-
-/* Toggle Switch */
-.toggle-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-}
-
-.toggle-label {
-  font-size: 0.95rem;
-  color: #333;
-  font-weight: 500;
-}
-
-.toggle-switch {
-  position: relative;
-  width: 50px;
-  height: 26px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.3s;
-  border-radius: 34px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background-color: #91DCDC;
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(24px);
 }
 
 /* Buttons */
@@ -487,19 +403,15 @@
   margin-top: 8px;
 }
 
-.button-group {
-  display: flex;
-  gap: 12px;
-}
-
 /* Success/Error Messages */
 .message-box {
   padding: 12px 16px;
   border-radius: 8px;
-  margin-bottom: 16px;
+  margin: 0 auto 16px auto;
   font-size: 0.9rem;
   font-weight: 500;
   animation: slideIn 0.3s ease;
+  max-width: 1100px;
 }
 
 .message-success {
@@ -628,7 +540,51 @@
   flex: 1;
 }
 
+/* Team Code Section */
+.team-code-display {
+  background: #f8f9fa;
+  border: 2px dashed #91DCDC;
+  border-radius: 8px;
+  padding: 16px;
+  text-align: center;
+  margin-top: 12px;
+}
+
+.team-code-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.team-code-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #91DCDC;
+  letter-spacing: 2px;
+  font-family: monospace;
+}
+
 /* Responsive Design */
+@media (max-width: 968px) {
+  .profile-content {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .profile-sidebar {
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .profile-main {
+    width: 100%;
+    max-width: 600px;
+  }
+
+  .profile-image-card {
+    position: static;
+  }
+}
 
 @media (max-width: 768px) {
   .profile-container {
@@ -662,10 +618,6 @@
   .btn-secondary {
     width: 100%;
   }
-
-  .button-group {
-    flex-direction: column;
-  }
 }
 
 @media (max-width: 480px) {
@@ -695,80 +647,4 @@
     font-size: 0.95rem;
     padding: 10px 14px;
   }
-  /* PC用レイアウト */
-  .profile-content{
-    display:flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 32px;
-  }
-
-  .profile-sidebar{
-    width: 280px;
-    flex-shrink: 0;
-  }
-  .profile-main{
-    flex:1;
-  }
-
-  /* スマホ用レイアウト */
-  @media (max-width: 768px) {
-    .profile-content{
-      flex-direction: column;
-      align-items: center;
-    }
-    .profile-sidebar{
-      width:100%;
-      max-width:400px;
-    }
-    .profile-main{
-      width:100%;
-      max-width:600px;
-    }
-    .profile-image-card{
-      position: static;
-    }
-  }
-  /* PC専用：1画面レイアウト*/
-
-@media (min-width: 969px) {
-
-  /* 全体を画面の高さにフィットさせる */
-  .profile-container {
-    height: calc(100vh - 124px); /* ヘッダーの高さを引く */
-  }
-
-  .profile-content {
-    height: 100%;
-    width: 100%;
-    display: flex;
-  }
-
-  /* 左右を画面の高さに合わせる */
-  .profile-sidebar,
-  .profile-main {
-    height: 100%;
-  }
-
-  /* 右側だけスクロールさせる */
-  .profile-main {
-    flex: 1;
-    max-width: none;
-    overflow-y: auto;
-    padding-right: 8px;
-  }
-
-  /* 左側を固定 */
-  .profile-image-card {
-    position: sticky;
-    top: 100px;
-    max-height: calc(100vh - 140px);
-  }
-
-  /* 画面全体の縦スクロールを無効化したい場合 */
-  body {
-    overflow: hidden;
-  }
-}
-
 }
