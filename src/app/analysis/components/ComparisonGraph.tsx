@@ -56,10 +56,10 @@ export default function ComparisonGraph({
               value = stats.reduce((sum, item) => sum + item.spin, 0) / stats.length;
               break;
             case 'avgTrueSpin':
-              value = stats.reduce((sum, item) => sum + item.trueSpin, 0) / stats.length;
+              value = stats.reduce((sum, item) => sum + (item.trueSpin || 0), 0) / stats.length;
               break;
             case 'avgSpinEff':
-              value = stats.reduce((sum, item) => sum + item.spinEff, 0) / stats.length;
+              value = stats.reduce((sum, item) => sum + (item.spinEff || 0), 0) / stats.length;
               break;
             case 'strikeRate':
               value = (stats.filter(s => s.strike === 1).length / stats.length) * 100;
@@ -79,7 +79,7 @@ export default function ComparisonGraph({
     const maxValues = {
       speed: Math.max(...allStats.map(d => d.speed), 1),
       spin: Math.max(...allStats.map(d => d.spin), 1),
-      trueSpin: Math.max(...allStats.map(d => d.trueSpin), 1),
+      trueSpin: Math.max(...allStats.map(d => d.trueSpin || 0), 1),
     };
 
     const metrics = [
@@ -105,10 +105,10 @@ export default function ComparisonGraph({
               value = Math.round((stats.reduce((sum, s) => sum + s.spin, 0) / stats.length) / maxValues.spin * 100);
               break;
             case 'avgTrueSpin':
-              value = Math.round((stats.reduce((sum, s) => sum + s.trueSpin, 0) / stats.length) / maxValues.trueSpin * 100);
+              value = Math.round((stats.reduce((sum, s) => sum + (s.trueSpin || 0), 0) / stats.length) / maxValues.trueSpin * 100);
               break;
             case 'avgSpinEff':
-              value = Math.round(stats.reduce((sum, s) => sum + s.spinEff, 0) / stats.length);
+              value = Math.round(stats.reduce((sum, s) => sum + (s.spinEff || 0), 0) / stats.length);
               break;
             case 'strikeRate':
               value = Math.round((stats.filter(s => s.strike === 1).length / stats.length) * 100);
@@ -270,8 +270,8 @@ export default function ComparisonGraph({
               const maxSpeed = Math.max(...stats.map(s => s.speed));
               const avgSpin = stats.reduce((sum, s) => sum + s.spin, 0) / stats.length;
               const maxSpin = Math.max(...stats.map(s => s.spin));
-              const avgTrueSpin = stats.reduce((sum, s) => sum + s.trueSpin, 0) / stats.length;
-              const avgSpinEff = stats.reduce((sum, s) => sum + s.spinEff, 0) / stats.length;
+              const avgTrueSpin = stats.reduce((sum, s) => sum + (s.trueSpin || 0), 0) / stats.length;
+              const avgSpinEff = stats.reduce((sum, s) => sum + (s.spinEff || 0), 0) / stats.length;
               const strikeRate = (stats.filter(s => s.strike === 1).length / stats.length) * 100;
 
               return (

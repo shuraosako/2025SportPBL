@@ -60,7 +60,7 @@ export default function Login() {
         }
         const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier);
         setVerificationId(confirmationResult.verificationId);
-        alert("OTP sent to your phone number.");
+        setError(t('login.otpSent'));
       }
     } catch (err: any) {
       console.error("Login error:", err);
@@ -83,7 +83,6 @@ export default function Login() {
       // credentialを作成してサインイン
       const credential = PhoneAuthProvider.credential(verificationId, otp);
       await signInWithCredential(auth, credential);
-      alert("Phone number verified successfully.");
       router.push("/home");
     } catch (err: any) {
       console.error("OTP verification error:", err);
@@ -171,7 +170,7 @@ export default function Login() {
                 id="otp"
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
-                placeholder="認証コードを入力"
+                placeholder={t('login.verifyOTPPrompt')}
                 required
               />
               <button

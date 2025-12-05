@@ -5,7 +5,7 @@ import "./create_player.css";
 import { useRouter } from "next/navigation";
 import Navigation from "@/components/layout/Navigation";
 import { db, storage } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -13,7 +13,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 export default function Homepage() {
   const router = useRouter();
   const { t } = useLanguage();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [error, setError] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [grade, setGrade] = useState("");
@@ -21,13 +20,8 @@ export default function Homepage() {
   const [weight, setWeight] = useState("");
   const [throwingHand, setThrowingHand] = useState("");
   const [favoritePitch, setFavoritePitch] = useState("");
-  const [date, setDate] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   // Handle image file selection
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +41,7 @@ export default function Homepage() {
   const handleAddPlayer = async (event: { preventDefault: () => void }) => {
     event.preventDefault();
 
-    if (!playerName || !grade || !height || !weight || !throwingHand || !favoritePitch || !date || !image) {
+    if (!playerName || !grade || !height || !weight || !throwingHand || !favoritePitch || !image) {
       setError(t("createPlayer.errorAllFields"));
       return;
     }
@@ -70,8 +64,9 @@ export default function Homepage() {
         weight: weight,
         throwingHand: throwingHand,
         favoritePitch: favoritePitch,
-        creationDate: date,
+        creationDate: serverTimestamp(),
         imageURL: imageDownloadURL,
+        condition: 'healthy'
       });
 
       // Clear form fields and image preview
@@ -81,7 +76,6 @@ export default function Homepage() {
       setWeight("");
       setThrowingHand("");
       setFavoritePitch("");
-      setDate("");
       setImage(null);
       setImageURL(null);
       setError("");
@@ -167,15 +161,6 @@ export default function Homepage() {
               <option value="forkball">{t("createPlayer.forkball")}</option>
               <option value="cutter">{t("createPlayer.cutter")}</option>
             </select>
-
-            {/* Date Selection */}
-            <label>{t("createPlayer.date")}:</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
 
             {/* Image Upload */}
             <label>{t("createPlayer.photo")}:</label>

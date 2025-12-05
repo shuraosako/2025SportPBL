@@ -31,6 +31,8 @@
   "home.rightHanded": "Right-Handed",
   "home.straight": "Straight",
   "home.healthy": "Healthy",
+  "home.injured": "Injured",
+  "home.sick": "Sick",
   "home.lastUpdate": "Last Update",
   "home.noPlayers": "No players found. Adjust your filters or add a new player.",
   
@@ -83,6 +85,9 @@
   "login.phoneLogin": "Phone Login",
   "login.enterOTP": "Enter verification code",
   "login.phoneNumberPlaceholder": "+81 90-1234-5678",
+  "login.otpSent": "OTP sent to your phone number.",
+  "login.phoneVerifiedSuccess": "Phone number verified successfully.",
+  "login.verifyOTPPrompt": "Enter verification code",
 
   "createAccount.title": "Create New Account",
   "createAccount.username": "Username",
@@ -115,7 +120,7 @@
   "createPlayer.photo": "Photo",
   "createPlayer.submit": "Register",
   "createPlayer.cancel": "Cancel",
-  "createPlayer.errorAllFields": "All fields, including profile photo and date, are required.",
+  "createPlayer.errorAllFields": "All fields are required.",
   "createPlayer.errorFailed": "Failed to add player.",
 
   "dataTable.title": "Uploaded Data",

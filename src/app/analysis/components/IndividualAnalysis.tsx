@@ -158,7 +158,7 @@ export default function IndividualAnalysis({
   const getSpinAtPosition = (pos: number) => spinMin + (spinMax - spinMin) * (pos / 100);
 
   // 色の計算（新しいデータほど濃く、ストライク/ボールで色分け）
-  const getPointColor = (index: number, strike: number) => {
+  const getPointColor = (index: number, strike?: number) => {
     const ratio = index / (scatterData.length - 1);
     const baseColor = strike === 1 ? [66, 126, 234] : [231, 76, 60]; // 青 or 赤
     const alpha = 0.3 + ratio * 0.7; // 0.3から1.0

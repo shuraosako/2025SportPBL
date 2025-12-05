@@ -33,6 +33,8 @@
   "home.rightHanded": "右投げ",
   "home.straight": "ストレート",
   "home.healthy": "健康",
+  "home.injured": "怪我",
+  "home.sick": "体調不良",
 
   "player.backToHome": "ホームに戻る",
   "player.uploadCSV": "CSVデータをアップロード",
@@ -94,6 +96,9 @@
   "login.phoneLogin": "電話番号でログイン",
   "login.enterOTP": "認証コードを入力",
   "login.phoneNumberPlaceholder": "+81 90-1234-5678",
+  "login.otpSent": "OTPが電話番号に送信されました。",
+  "login.phoneVerifiedSuccess": "電話番号が正常に確認されました。",
+  "login.verifyOTPPrompt": "OTPを入力してください",
 
   "createAccount.title": "新規アカウント作成",
   "createAccount.username": "ユーザー名",
@@ -126,7 +131,7 @@
   "createPlayer.photo": "写真",
   "createPlayer.submit": "登録",
   "createPlayer.cancel": "キャンセル",
-  "createPlayer.errorAllFields": "プロフィール写真と日付を含むすべてのフィールドが必要です。",
+  "createPlayer.errorAllFields": "すべてのフィールドを入力してください。",
   "createPlayer.errorFailed": "選手の追加に失敗しました。",
 
   "dataTable.title": "アップロードしたデータ",
@@ -193,11 +198,6 @@
   "analysis.scatterAxisSpin": "回転数",
   "analysis.monthLabel": "月",
   "analysis.players": "選手名",
-  
-  "table.rank": "順位",
-  "table.playerName": "選手名",
-  "table.record": "記録",
-  "table.date": "日付",
 
   "forgotPassword.title": "パスワードをお忘れの方",
   "forgotPassword.email": "メールアドレス",

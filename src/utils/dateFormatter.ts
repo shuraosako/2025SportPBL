@@ -4,11 +4,15 @@ import { FirebaseTimestamp } from '@/types';
  * Format Firebase timestamp to readable date string
  */
 export const formatFirebaseDate = (
-  timestamp?: FirebaseTimestamp,
+  timestamp?: FirebaseTimestamp | string,
   locale: string = 'en-GB'
 ): string => {
   if (!timestamp) {
     return 'Unknown date';
+  }
+
+  if (typeof timestamp === 'string') {
+    return new Date(timestamp).toLocaleDateString(locale);
   }
 
   return new Date(timestamp.seconds * 1000).toLocaleDateString(locale);

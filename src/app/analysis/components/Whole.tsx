@@ -2,26 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Player, PlayerData } from "@/types";
 import "./Whole.css";
-
-interface Player {
-  id: string;
-  name: string;
-  nameEn?: string; // 英語名を追加
-}
-
-interface PlayerData {
-  id: string;
-  date: string;
-  speed: number;
-  spin: number;
-  trueSpin?: number;
-  spinEff?: number;
-  spinDirection?: number;
-  verticalMovement?: number;
-  horizontalMovement?: number;
-  rating?: string;
-}
 
 interface WholeProps {
   players: Player[];

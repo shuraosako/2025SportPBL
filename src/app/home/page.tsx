@@ -5,7 +5,7 @@ import "./home.css";
 import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import Image from "next/image";
 import Navigation from "@/components/layout/Navigation";
@@ -32,13 +32,12 @@ export default function Home() {
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
-  const [playerConditions, setPlayerConditions] = useState<{[key: string]: string}>({});
 
   // コンディションオプション
   const conditionOptions = [
-    { value: "healthy", label: "健康", color: "#4CAF50", icon: "✓" },
-    { value: "injured", label: "怪我", color: "#F44336", icon: "⚠" },
-    { value: "sick", label: "体調不良", color: "#FF9800", icon: "⚠" }
+    { value: "healthy", labelKey: "home.healthy", color: "#4CAF50", icon: "✓" },
+    { value: "injured", labelKey: "home.injured", color: "#F44336", icon: "⚠" },
+    { value: "sick", labelKey: "home.sick", color: "#FF9800", icon: "⚠" }
   ];
 
   // Helper function to find field value with multiple possible key names
@@ -134,8 +133,13 @@ export default function Home() {
       const selectedDateString = selectedDate.toLocaleDateString("en-GB");
       filtered = filtered.filter((player) => {
         if (player.creationDate) {
-          const creationDate = new Date(player.creationDate.seconds * 1000).toLocaleDateString("en-GB");
-          return creationDate === selectedDateString;
+          if (typeof player.creationDate === 'string') {
+            const creationDate = new Date(player.creationDate).toLocaleDateString("en-GB");
+            return creationDate === selectedDateString;
+          } else if (typeof player.creationDate === 'object' && 'seconds' in player.creationDate) {
+            const creationDate = new Date(player.creationDate.seconds * 1000).toLocaleDateString("en-GB");
+            return creationDate === selectedDateString;
+          }
         }
         return false;
       });
@@ -170,16 +174,34 @@ export default function Home() {
     router.push(`/player/${playerId}`);
   };
 
-  const handleConditionChange = (playerId: string, condition: string, e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleConditionChange = async (playerId: string, condition: string, e: React.ChangeEvent<HTMLSelectElement>) => {
     e.stopPropagation();
-    setPlayerConditions(prev => ({
-      ...prev,
-      [playerId]: condition
-    }));
+
+    try {
+      // Update Firestore
+      const playerRef = doc(db, "players", playerId);
+      await updateDoc(playerRef, {
+        condition: condition as 'healthy' | 'injured' | 'sick'
+      });
+
+      // Update local state
+      setPlayers(prevPlayers =>
+        prevPlayers.map(p =>
+          p.id === playerId ? { ...p, condition: condition as 'healthy' | 'injured' | 'sick' } : p
+        )
+      );
+      setFilteredPlayers(prevPlayers =>
+        prevPlayers.map(p =>
+          p.id === playerId ? { ...p, condition: condition as 'healthy' | 'injured' | 'sick' } : p
+        )
+      );
+    } catch (error) {
+      console.error("Error updating condition:", error);
+    }
   };
 
-  const getCondition = (playerId: string) => {
-    return playerConditions[playerId] || "healthy";
+  const getCondition = (player: ExtendedPlayer) => {
+    return player.condition || "healthy";
   };
 
   const getConditionInfo = (condition: string) => {
@@ -267,7 +289,7 @@ export default function Home() {
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
               filteredPlayers.map((player) => {
-                const currentCondition = getCondition(player.id);
+                const currentCondition = getCondition(player);
                 const conditionInfo = getConditionInfo(currentCondition);
 
                 return (
@@ -320,7 +342,7 @@ export default function Home() {
                           >
                             {conditionOptions.map(option => (
                               <option key={option.value} value={option.value}>
-                                {option.icon} {option.label}
+                                {option.icon} {t(option.labelKey)}
                               </option>
                             ))}
                           </select>
@@ -346,7 +368,7 @@ export default function Home() {
                         )}
                         <span className="tag tag-blue">{t("home.straight")}</span>
                         <span className="tag" style={{ backgroundColor: conditionInfo.color }}>
-                          {conditionInfo.label}
+                          {t(conditionInfo.labelKey)}
                         </span>
                       </div>
                     </div>
