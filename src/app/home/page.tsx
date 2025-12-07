@@ -32,6 +32,14 @@ export default function Home() {
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
+const normalizeGrade = (grade: string) => {
+  if (!grade) return "";
+ 
+  const numericGrade = grade.replace(/[^\d]/g, '');
+  
+  if (!numericGrade) return grade;
+  return numericGrade; 
+};
 
   // コンディションオプション
   const conditionOptions = [
@@ -271,10 +279,10 @@ export default function Home() {
             >
               <option value="">{t("home.allGrades")}</option>
               {grades.map((grade, index) => (
-                <option key={index} value={grade}>
-                  {grade}
-                </option>
-              ))}
+              <option key={index} value={grade}>
+              {normalizeGrade(grade)}
+             </option>
+                 ))}
             </select>
 
             <div className="filter_button">
@@ -299,7 +307,7 @@ export default function Home() {
                     onClick={() => handlePlayerClick(player.id)}
                   >
                     <div className="player-card-header">
-                      <span className="grade-badge">{player.grade}</span>
+                      <span className="grade-badge">{normalizeGrade(player.grade)}{t("home1.grade")}</span>
                     </div>
                     <div className="player-card-body">
                       {player.imageURL && (
@@ -377,6 +385,7 @@ export default function Home() {
                     </div>
                   </div>
                 );
+                
               })
             ) : (
               <p>{t("home.noPlayers")}</p>
