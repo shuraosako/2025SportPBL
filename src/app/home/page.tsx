@@ -13,7 +13,6 @@ import { Player } from "@/types";
 import { formatFirebaseDate } from "@/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// Playerタイプを拡張（得意球種と利き手、球速データを追加）
 interface ExtendedPlayer extends Player {
   throwingHand?: string;
   favoritePitch?: string;
@@ -32,14 +31,13 @@ export default function Home() {
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
-const normalizeGrade = (grade: string) => {
-  if (!grade) return "";
- 
-  const numericGrade = grade.replace(/[^\d]/g, '');
-  
-  if (!numericGrade) return grade;
-  return numericGrade; 
-};
+
+  const normalizeGrade = (grade: string) => {
+    if (!grade) return "";
+    const numericGrade = grade.replace(/[^\d]/g, '');
+    if (!numericGrade) return grade;
+    return numericGrade; 
+  };
 
   // コンディションオプション
   const conditionOptions = [
@@ -48,7 +46,6 @@ const normalizeGrade = (grade: string) => {
     { value: "sick", labelKey: "home.sick", color: "#FF9800", icon: "⚠" }
   ];
 
-  // Helper function to find field value with multiple possible key names
   const findFieldValue = (record: any, ...possibleKeys: string[]): any => {
     for (const key of possibleKeys) {
       if (record[key] !== undefined && record[key] !== null && record[key] !== "") {
@@ -58,7 +55,6 @@ const normalizeGrade = (grade: string) => {
     return null;
   };
 
-  // Fetch players from Firestore
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -70,8 +66,6 @@ const normalizeGrade = (grade: string) => {
               id: playerDoc.id,
               ...playerDoc.data(),
             } as ExtendedPlayer;
-
-            // Fetch CSV data for this player to get speed statistics
             try {
               const csvDataRef = collection(db, "players", playerDoc.id, "csvData");
               const csvSnapshot = await getDocs(csvDataRef);
@@ -79,7 +73,6 @@ const normalizeGrade = (grade: string) => {
               if (!csvSnapshot.empty) {
                 const records = csvSnapshot.docs.map(doc => doc.data());
 
-                // Extract speeds from records
                 const speeds = records.map(r => {
                   const value = findFieldValue(
                     r,
@@ -100,7 +93,7 @@ const normalizeGrade = (grade: string) => {
 
                 if (speeds.length > 0) {
                   playerData.maxSpeed = Math.max(...speeds);
-                  playerData.recentSpeed = speeds[speeds.length - 1]; // Last recorded speed
+                  playerData.recentSpeed = speeds[speeds.length - 1]; 
                 }
               }
             } catch (error) {
@@ -112,7 +105,15 @@ const normalizeGrade = (grade: string) => {
         );
 
         const uniqueNames = Array.from(new Set(playerList.map((player) => player.name)));
-        const uniqueGrades = Array.from(new Set(playerList.map((player) => player.grade)));
+        
+        
+        const uniqueGrades = Array.from(
+          new Set(
+            playerList
+              .map((player) => normalizeGrade(player.grade))
+              .filter(grade => grade)
+          )
+        ).sort((a, b) => parseInt(a) - parseInt(b)); 
 
         setPlayers(playerList);
         setFilteredPlayers(playerList);
@@ -134,7 +135,7 @@ const normalizeGrade = (grade: string) => {
     }
 
     if (searchGrade) {
-      filtered = filtered.filter((player) => player.grade === searchGrade);
+      filtered = filtered.filter((player) => normalizeGrade(player.grade) === searchGrade);
     }
 
     if (selectedDate) {
@@ -186,13 +187,11 @@ const normalizeGrade = (grade: string) => {
     e.stopPropagation();
 
     try {
-      // Update Firestore
       const playerRef = doc(db, "players", playerId);
       await updateDoc(playerRef, {
         condition: condition as 'healthy' | 'injured' | 'sick'
       });
 
-      // Update local state
       setPlayers(prevPlayers =>
         prevPlayers.map(p =>
           p.id === playerId ? { ...p, condition: condition as 'healthy' | 'injured' | 'sick' } : p
@@ -216,14 +215,12 @@ const normalizeGrade = (grade: string) => {
     return conditionOptions.find(opt => opt.value === condition) || conditionOptions[0];
   };
 
-  // 利き手の翻訳を取得
   const getThrowingHandLabel = (hand: string) => {
     if (hand === "right") return t("createPlayer.rightHanded");
     if (hand === "left") return t("createPlayer.leftHanded");
     return hand;
   };
 
-  // 得意球種の翻訳を取得
   const getFavoritePitchLabel = (pitch: string) => {
     const pitchMap: { [key: string]: string } = {
       fastball: t("createPlayer.fastball"),
@@ -279,10 +276,10 @@ const normalizeGrade = (grade: string) => {
             >
               <option value="">{t("home.allGrades")}</option>
               {grades.map((grade, index) => (
-              <option key={index} value={grade}>
-              {normalizeGrade(grade)}
-             </option>
-                 ))}
+                <option key={index} value={grade}>
+                  {grade}
+                </option>
+              ))}
             </select>
 
             <div className="filter_button">

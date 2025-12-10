@@ -113,7 +113,7 @@ export default function Homepage() {
 
             <label>{t("createPlayer.grade")}:</label>
             <input
-              type="text"
+              type="number"
               value={grade}
               onChange={(e) => setGrade(e.target.value)}
               required
