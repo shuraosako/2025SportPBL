@@ -13,7 +13,6 @@ import { Player } from "@/types";
 import { formatFirebaseDate } from "@/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// Playerタイプを拡張（得意球種と利き手、球速データを追加）
 interface ExtendedPlayer extends Player {
   throwingHand?: string;
   favoritePitch?: string;
@@ -33,6 +32,13 @@ export default function Home() {
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
 
+  const normalizeGrade = (grade: string) => {
+    if (!grade) return "";
+    const numericGrade = grade.replace(/[^\d]/g, '');
+    if (!numericGrade) return grade;
+    return numericGrade; 
+  };
+
   // コンディションオプション
   const conditionOptions = [
     { value: "healthy", labelKey: "home.healthy", color: "#4CAF50", icon: "✓" },
@@ -40,7 +46,6 @@ export default function Home() {
     { value: "sick", labelKey: "home.sick", color: "#FF9800", icon: "⚠" }
   ];
 
-  // Helper function to find field value with multiple possible key names
   const findFieldValue = (record: any, ...possibleKeys: string[]): any => {
     for (const key of possibleKeys) {
       if (record[key] !== undefined && record[key] !== null && record[key] !== "") {
@@ -50,7 +55,6 @@ export default function Home() {
     return null;
   };
 
-  // Fetch players from Firestore
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -62,8 +66,6 @@ export default function Home() {
               id: playerDoc.id,
               ...playerDoc.data(),
             } as ExtendedPlayer;
-
-            // Fetch CSV data for this player to get speed statistics
             try {
               const csvDataRef = collection(db, "players", playerDoc.id, "csvData");
               const csvSnapshot = await getDocs(csvDataRef);
@@ -71,7 +73,6 @@ export default function Home() {
               if (!csvSnapshot.empty) {
                 const records = csvSnapshot.docs.map(doc => doc.data());
 
-                // Extract speeds from records
                 const speeds = records.map(r => {
                   const value = findFieldValue(
                     r,
@@ -92,7 +93,7 @@ export default function Home() {
 
                 if (speeds.length > 0) {
                   playerData.maxSpeed = Math.max(...speeds);
-                  playerData.recentSpeed = speeds[speeds.length - 1]; // Last recorded speed
+                  playerData.recentSpeed = speeds[speeds.length - 1]; 
                 }
               }
             } catch (error) {
@@ -104,7 +105,15 @@ export default function Home() {
         );
 
         const uniqueNames = Array.from(new Set(playerList.map((player) => player.name)));
-        const uniqueGrades = Array.from(new Set(playerList.map((player) => player.grade)));
+        
+        
+        const uniqueGrades = Array.from(
+          new Set(
+            playerList
+              .map((player) => normalizeGrade(player.grade))
+              .filter(grade => grade)
+          )
+        ).sort((a, b) => parseInt(a) - parseInt(b)); 
 
         setPlayers(playerList);
         setFilteredPlayers(playerList);
@@ -126,7 +135,7 @@ export default function Home() {
     }
 
     if (searchGrade) {
-      filtered = filtered.filter((player) => player.grade === searchGrade);
+      filtered = filtered.filter((player) => normalizeGrade(player.grade) === searchGrade);
     }
 
     if (selectedDate) {
@@ -178,13 +187,11 @@ export default function Home() {
     e.stopPropagation();
 
     try {
-      // Update Firestore
       const playerRef = doc(db, "players", playerId);
       await updateDoc(playerRef, {
         condition: condition as 'healthy' | 'injured' | 'sick'
       });
 
-      // Update local state
       setPlayers(prevPlayers =>
         prevPlayers.map(p =>
           p.id === playerId ? { ...p, condition: condition as 'healthy' | 'injured' | 'sick' } : p
@@ -208,14 +215,12 @@ export default function Home() {
     return conditionOptions.find(opt => opt.value === condition) || conditionOptions[0];
   };
 
-  // 利き手の翻訳を取得
   const getThrowingHandLabel = (hand: string) => {
     if (hand === "right") return t("createPlayer.rightHanded");
     if (hand === "left") return t("createPlayer.leftHanded");
     return hand;
   };
 
-  // 得意球種の翻訳を取得
   const getFavoritePitchLabel = (pitch: string) => {
     const pitchMap: { [key: string]: string } = {
       fastball: t("createPlayer.fastball"),
@@ -299,7 +304,7 @@ export default function Home() {
                     onClick={() => handlePlayerClick(player.id)}
                   >
                     <div className="player-card-header">
-                      <span className="grade-badge">{player.grade}</span>
+                      <span className="grade-badge">{normalizeGrade(player.grade)}{t("home1.grade")}</span>
                     </div>
                     <div className="player-card-body">
                       {player.imageURL && (
@@ -377,6 +382,7 @@ export default function Home() {
                     </div>
                   </div>
                 );
+                
               })
             ) : (
               <p>{t("home.noPlayers")}</p>
