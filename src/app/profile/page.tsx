@@ -179,7 +179,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       <Navigation showProfile={true} showHamburger={true} />
 
       <div className="profile-container">
-        <h1 className="profile-title">プロフィール設定</h1>
+        <h1 className="profile-title">{t("profile.title")}</h1>
 
         {message && (
           <div className={`message-box ${message.type === "success" ? "message-success" : "message-error"}`}>
@@ -199,96 +199,123 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
                 <div className="profile-avatar-placeholder">👤</div>
               )}
 
-              <label className="upload-button">
-                画像をアップロード
+              <label className="upload-button">{t("profile.uploadPhoto")}
                 <input type="file" accept="image/*" onChange={handleImageUpload} className="file-input-hidden" />
               </label>
 
               <h3 className="profile-username">{newUsername}</h3>
             </div>
+
+            {/* ⬇️ ここに統計情報を追加 ⬇️ */}
+  <div className="account-stats-card">
+    <h3 className="stats-title">{t("profile.accountStats")}</h3>
+    <div className="stat-item">
+      <span className="stat-label">{t("profile.accountCreationDate")}</span>
+      <span className="stat-value">{user?.metadata.creationTime ? new Date(user.metadata.creationTime).toLocaleDateString('ja-JP') : '不明'}</span>
+    </div>
+    <div className="stat-item">
+      <span className="stat-label">{t("profile.lastLogin")}</span>
+      <span className="stat-value">{user?.metadata.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleDateString('ja-JP') : '不明'}</span>
+    </div>
+    <div className="stat-item">
+      <span className="stat-label">{t("profile.currentEmail")}</span>
+      <span className="stat-value">{email || '未設定'}</span>
+    </div>
+  </div>
+
           </div>
 
           {/* 中央 基本情報 */}
           <div className="profile-main">
             <div className="profile-card">
-              <h2 className="section-title">基本情報</h2>
+              <h2 className="section-title">{t("profile.accountInfo")}</h2>
 
-              <div className="form-group">
-                <label>ユーザー名</label>
+              <div className="form-group">{t("profile.currentUsername")}
                 <input value={newUsername} onChange={(e) => setNewUsername(e.target.value)} className="form-input" />
               </div>
 
-              <div className="form-group">
-                <label>メールアドレス</label>
+              <div className="form-group">{t("profile.currentEmail")}
                 <input value={email} disabled className="form-input" />
               </div>
             </div>
 
             <div className="profile-card">
-              <h2 className="section-title">パスワード変更</h2>
+              <h2 className="section-title">{t("profile.changePassword")}</h2>
 
               <div className="form-group">
-                <label>新しいパスワード</label>
+                <label>{t("profile.newPassword")}</label>
                 <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="form-input" />
               </div>
 
               <div className="form-group">
-                <label>確認用パスワード</label>
+                <label>{t("profile.confirmPassword")}</label>
                 <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="form-input" />
               </div>
             </div>
-
-            <button className="btn-primary" onClick={handleSaveChanges}>
-              保存する
+          <div className="save-button-container">
+            <button className="btn-primary" onClick={handleSaveChanges} disabled={isLoading}>
+              {isLoading ? t("profile.saving") : t("profile.saveChanges")}
             </button>
           </div>
+        </div>
 
           {/* 右サイド */}
           <div className="profile-main-right">
             <div className="profile-card">
-              <h2 className="section-title">プライベート情報</h2>
+              <h2 className="section-title">{t("profile.privateInfo")}</h2>
 
               <div className="form-group">
-                <label>誕生日</label>
+                <label>{t("profile.birthDate")}</label>
                 <input type="date" value={birthDate} onChange={(e) => setBirthDate(e.target.value)} className="form-input" />
               </div>
 
               <div className="form-group">
-                <label>緊急連絡先</label>
+                <label>{t("profile.emergencyContact")}</label>
                 <input value={emergencyContact} onChange={(e) => setEmergencyContact(e.target.value)} className="form-input" />
               </div>
 
               <div className="form-group">
-                <label>緊急連絡先の名前</label>
+                <label>{t("profile.emergencyContactName")}</label>
                 <input value={emergencyName} onChange={(e) => setEmergencyName(e.target.value)} className="form-input" />
               </div>
             </div>
 
             <div className="profile-card">
-              <h2 className="section-title">チーム参加</h2>
+              <h2 className="section-title">{t("profile.teamParticipation")}</h2>
               <input value={teamCode} onChange={(e) => setTeamCode(e.target.value)} className="form-input" />
               <button className="btn-primary" onClick={handleJoinTeam}>
-                参加する
+                {t("profile.join")}
               </button>
             </div>
-
+          <div className="save-button=container">
             <button className="btn-logout" onClick={() => setShowLogoutModal(true)}>
-              ログアウト
+              {t("profile.logout")}
             </button>
+          </div>
 
+          <div className="save-button=container">
             <button className="btn-danger" onClick={() => setShowDeleteModal(true)}>
-              アカウント削除
+              {t("profile.deleteAccount")}
             </button>
           </div>
         </div>
       </div>
+    </div>
 
       {/* ログアウトモーダル */}
       {showLogoutModal && (
         <div className="modal-overlay" onClick={() => setShowLogoutModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>ログアウトしますか？</h2>
-            <button onClick={handleLogout}>ログアウト</button>
+            <h2 className="modal-title">{t("profile.logoutConfirmation")}</h2>
+            <p  className="modal-text">{t("profile.logoutWarning")}</p>
+            <div className="modal-buttons">
+              <button className="btn-secondary" onClick={()=> setShowLogoutModal(false)}>
+                {t("profile.cancel")}
+              </button>
+              <button className="btn-primary" onClick={handleLogout}>
+                {t("profile.logout")}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -297,10 +324,16 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       {showDeleteModal && (
         <div className="modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>本当に削除しますか？</h2>
-            <button onClick={handleDeleteAccount} className="btn-danger">
-              削除する
-            </button>
+            <h2 className="modal-title">{t("profile.deleteAccountConfirmation")}</h2>
+            <p className="modal-text">{t("profile.deleteAccountWarning")}</p>
+            <div className="modal-buttons">
+              <button className="btn-secondary" onClick={()=> setShowDeleteModal(false)}>
+                {t("profile.cancel")}
+              </button>
+              <button className="btn-danger" onClick={handleDeleteAccount}>
+                {t("profile.delete")}
+              </button>
+            </div>
           </div>
         </div>
       )}
