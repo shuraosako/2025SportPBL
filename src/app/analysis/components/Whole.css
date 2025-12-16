@@ -32,67 +32,99 @@
   border-bottom: 3px solid #2563eb;
 }
 
-/* 記録値のスタイル */
-.whole-record-value {
+/* Top5テーブルのラッパー */
+.whole-top5-table-wrapper {
+  overflow-x: auto;
+}
+
+/* Top5テーブル本体 */
+.whole-top5-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* テーブルヘッダー */
+.whole-top5-table thead th {
+  background-color: #f3f4f6;
+  padding: 12px 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: #374151;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+/* 列幅の統一 */
+.whole-top5-table thead th:nth-child(1) {
+  width: 60px; /* 順位 */
+}
+
+.whole-top5-table thead th:nth-child(2) {
+  width: auto; /* 選手名 */
+  min-width: 120px;
+}
+
+.whole-top5-table thead th:nth-child(3) {
+  width: 100px; /* 記録 */
+}
+
+.whole-top5-table thead th:nth-child(4) {
+  width: 90px; /* 日付 */
+}
+
+/* テーブルボディのセル */
+.whole-top5-table tbody td {
+  padding: 12px 8px;
+  text-align: center;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 14px;
+}
+
+/* 順位セル */
+.whole-top5-rank-cell {
+  text-align: center !important;
+}
+
+/* 順位バッジ */
+.whole-top5-rank {
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  border-radius: 50%;
   font-weight: bold;
-  font-size: 16px;
-  color: #2563eb;
+  font-size: 14px;
+  color: white;
+  text-align: center;
 }
 
-/* 日付セル */
-.whole-date-cell {
-  color: #6b7280;
-  font-size: 13px;
+.whole-top5-rank-1 {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #000;
 }
 
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-  .whole-separate-tables {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .whole-individual-table {
-    padding: 16px;
-  }
-
-  .whole-individual-title {
-    font-size: 18px;
-  }
-
-  .whole-record-value {
-    font/* 既存のCSSに以下を追加 */
-
-/* 項目別表示用コンテナ */
-.whole-separate-tables {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 24px;
-  margin-top: 20px;
+.whole-top5-rank-2 {
+  background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+  color: #000;
 }
 
-/* 個別テーブルコンテナ */
-.whole-individual-table {
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s, box-shadow 0.2s;
+.whole-top5-rank-3 {
+  background: linear-gradient(135deg, #cd7f32, #e8a87c);
+  color: #fff;
 }
 
-.whole-individual-table:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+.whole-top5-rank-4,
+.whole-top5-rank-5 {
+  background: linear-gradient(135deg, #6b7280, #9ca3af);
+  color: #fff;
 }
 
-/* 個別テーブルのタイトル */
-.whole-individual-title {
-  font-size: 20px;
-  font-weight: bold;
+/* 選手名セル */
+.whole-top5-table tbody td:nth-child(2) {
+  text-align: center !important;
+  font-weight: 500;
   color: #111827;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 3px solid #2563eb;
 }
 
 /* 記録値のスタイル */
@@ -100,12 +132,14 @@
   font-weight: bold;
   font-size: 16px;
   color: #2563eb;
+  text-align: center !important;
 }
 
 /* 日付セル */
 .whole-date-cell {
   color: #6b7280;
   font-size: 13px;
+  text-align: center !important;
 }
 
 /* レスポンシブ対応 */
@@ -126,6 +160,23 @@
   .whole-record-value {
     font-size: 14px;
   }
-}-size: 14px;
+
+  .whole-top5-table thead th:nth-child(1) {
+    width: 50px;
+  }
+
+  .whole-top5-table thead th:nth-child(3) {
+    width: 85px;
+  }
+
+  .whole-top5-table thead th:nth-child(4) {
+    width: 80px;
+  }
+
+  .whole-top5-rank {
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    font-size: 12px;
   }
 }
