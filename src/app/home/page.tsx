@@ -5,8 +5,9 @@ import "./home.css";
 import { useRouter } from "next/navigation";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { collection, getDocs, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { db, storage } from "@/lib/firebase";
+import { ref, deleteObject } from "firebase/storage";
 import Image from "next/image";
 import Navigation from "@/components/layout/Navigation";
 import { Player } from "@/types";
@@ -32,6 +33,11 @@ export default function Home() {
   const [searchName, setSearchName] = useState("");
   const [nameSuggestions, setNameSuggestions] = useState<string[]>([]);
   const [searchGrade, setSearchGrade] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; playerId: string; playerName: string }>({
+    show: false,
+    playerId: "",
+    playerName: ""
+  });
 
   // 学年から数字のみを抽出する関数
   const normalizeGrade = (grade: string) => {
@@ -219,6 +225,60 @@ export default function Home() {
     }
   };
 
+  // 削除確認ダイアログを表示
+  const handleDeleteClick = (playerId: string, playerName: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteConfirm({ show: true, playerId, playerName });
+  };
+
+  // 削除をキャンセル
+  const handleCancelDelete = () => {
+    setDeleteConfirm({ show: false, playerId: "", playerName: "" });
+  };
+
+  // 選手を削除
+  const handleConfirmDelete = async () => {
+    const { playerId } = deleteConfirm;
+    
+    try {
+      const player = players.find(p => p.id === playerId);
+      
+      // プロフィール画像を削除
+      if (player?.imageURL) {
+        try {
+          const imageRef = ref(storage, player.imageURL);
+          await deleteObject(imageRef);
+        } catch (error) {
+          console.error("Error deleting image:", error);
+        }
+      }
+
+      // サブコレクション（csvData）を削除
+      try {
+        const csvDataRef = collection(db, "players", playerId, "csvData");
+        const csvSnapshot = await getDocs(csvDataRef);
+        const deletePromises = csvSnapshot.docs.map(doc => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);
+      } catch (error) {
+        console.error("Error deleting subcollection:", error);
+      }
+
+      // プレイヤードキュメントを削除
+      const playerRef = doc(db, "players", playerId);
+      await deleteDoc(playerRef);
+
+      // ローカルステートから削除
+      setPlayers(prevPlayers => prevPlayers.filter(p => p.id !== playerId));
+      setFilteredPlayers(prevPlayers => prevPlayers.filter(p => p.id !== playerId));
+
+      // 確認ダイアログを閉じる
+      setDeleteConfirm({ show: false, playerId: "", playerName: "" });
+    } catch (error) {
+      console.error("Error deleting player:", error);
+      alert(t("home.deleteError") || "削除中にエラーが発生しました");
+    }
+  };
+
   const getCondition = (player: ExtendedPlayer) => {
     return player.condition || "healthy";
   };
@@ -319,6 +379,22 @@ export default function Home() {
                   >
                     <div className="player-card-header">
                       <span className="grade-badge">{normalizeGrade(player.grade)}{t("home1.grade")}</span>
+                      <button
+                        className="delete-button"
+                        onClick={(e) => handleDeleteClick(player.id, player.name, e)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#f44336',
+                          fontSize: '20px',
+                          cursor: 'pointer',
+                          padding: '4px 8px',
+                          marginLeft: 'auto'
+                        }}
+                        title={t("home.deletePlayer") || "選手を削除"}
+                      >
+                        🗑️
+                      </button>
                     </div>
                     <div className="player-card-body">
                       {player.imageURL && (
@@ -404,6 +480,68 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* 削除確認モーダル */}
+      {deleteConfirm.show && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '30px',
+            borderRadius: '10px',
+            maxWidth: '400px',
+            textAlign: 'center',
+            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+          }}>
+            <h3 style={{ marginBottom: '20px', color: '#333' }}>
+              {t("home.deleteConfirmTitle") }
+            </h3>
+            <p style={{ marginBottom: '30px', color: '#666' }}>
+              {t("home.deleteConfirmMessage") } <strong>{deleteConfirm.playerName}</strong> {t("home.deleteConfirmMessage2") }
+            </p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button
+                onClick={handleCancelDelete}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '5px',
+                  border: '1px solid #ccc',
+                  backgroundColor: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px'
+                }}
+              >
+                {t("home.cancel") }
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                style={{
+                  padding: '10px 20px',
+                  borderRadius: '5px',
+                  border: 'none',
+                  backgroundColor: '#f44336',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: 'bold'
+                }}
+              >
+                {t("home.delete")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
