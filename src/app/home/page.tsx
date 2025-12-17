@@ -275,7 +275,7 @@ export default function Home() {
       setDeleteConfirm({ show: false, playerId: "", playerName: "" });
     } catch (error) {
       console.error("Error deleting player:", error);
-      alert(t("home.deleteError") || "削除中にエラーが発生しました");
+      alert(t("home.deleteError") );
     }
   };
 
@@ -391,7 +391,7 @@ export default function Home() {
                           padding: '4px 8px',
                           marginLeft: 'auto'
                         }}
-                        title={t("home.deletePlayer") || "選手を削除"}
+                        title={t("home.deletePlayer") }
                       >
                         🗑️
                       </button>
