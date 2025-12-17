@@ -415,65 +415,121 @@ export default function Home() {
                           {t("home.maxSpeed")}: {player.maxSpeed ? `${player.maxSpeed.toFixed(1)}` : "-"}/
                           {player.recentSpeed ? `${player.recentSpeed.toFixed(1)}` : "-"}[km/h]
                         </p>
+                        <div className="player-details">
+                          <p>
+                            {t("home.maxSpeed")}: {player.maxSpeed ? `${player.maxSpeed.toFixed(1)}` : "-"}/
+                            {player.recentSpeed ? `${player.recentSpeed.toFixed(1)}` : "-"}[km/h]
+                          </p>
 
-                        {/* コンディション ドロップダウン */}
-                        <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {t("home.condition")}:
-                          <select
-                            value={currentCondition}
-                            onChange={(e) => handleConditionChange(player.id, e.target.value, e)}
-                            onClick={(e) => e.stopPropagation()}
-                            style={{
-                              padding: '4px 8px',
-                              borderRadius: '4px',
-                              border: `2px solid ${conditionInfo.color}`,
-                              backgroundColor: 'white',
+                          {/* コンディション ドロップダウン */}
+                          <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {t("home.condition")}:
+                            <select
+                              value={currentCondition}
+                              onChange={(e) => handleConditionChange(player.id, e.target.value, e)}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '4px',
+                                border: `2px solid ${conditionInfo.color}`,
+                                backgroundColor: 'white',
+                                color: conditionInfo.color,
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                fontSize: '13px',
+                                outline: 'none'
+                              }}
+                            >
+                              {conditionOptions.map(option => (
+                                <option key={option.value} value={option.value}>
+                                  {option.icon} {t(option.labelKey)}
+                                </option>
+                              ))}
+                            </select>
+                            <span style={{
                               color: conditionInfo.color,
                               fontWeight: 'bold',
-                              cursor: 'pointer',
-                              fontSize: '13px',
-                              outline: 'none'
-                            }}
-                          >
-                            {conditionOptions.map(option => (
-                              <option key={option.value} value={option.value}>
-                                {option.icon} {t(option.labelKey)}
-                              </option>
-                            ))}
-                          </select>
-                          <span style={{
-                            color: conditionInfo.color,
-                            fontWeight: 'bold',
-                            fontSize: '16px'
-                          }}>
-                            {conditionInfo.icon}
+                              fontSize: '16px'
+                            }}>
+                              {conditionInfo.icon}
+                            </span>
+                          </p>
+                        </div>
+                        <div className="player-tags">
+                          {player.favoritePitch && (
+                            <span className="tag tag-blue">
+                              {getFavoritePitchLabel(player.favoritePitch)}
+                            </span>
+                          )}
+                          {player.throwingHand && (
+                            <span className="tag tag-blue">
+                              {getThrowingHandLabel(player.throwingHand)}
+                            </span>
+                          )}
+                          <span className="tag tag-blue">{t("home.straight")}</span>
+                          <span className="tag" style={{ backgroundColor: conditionInfo.color }}>
+                            {t(conditionInfo.labelKey)}
                           </span>
-                        </p>
+                        </div>
                       </div>
-                      <div className="player-tags">
-                        {player.favoritePitch && (
-                          <span className="tag tag-blue">
-                            {getFavoritePitchLabel(player.favoritePitch)}
-                          </span>
-                        )}
-                        {player.throwingHand && (
-                          <span className="tag tag-blue">
-                            {getThrowingHandLabel(player.throwingHand)}
-                          </span>
-                        )}
-                        <span className="tag tag-blue">{t("home.straight")}</span>
-                        <span className="tag" style={{ backgroundColor: conditionInfo.color }}>
-                          {t(conditionInfo.labelKey)}
-                        </span>
+                      <div className="player-card-footer">
+                        {t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}
                       </div>
                     </div>
-                    <div className="player-card-footer">
-                      {t("home.lastUpdate")}: {formatFirebaseDate(player.creationDate)}
-                    </div>
+                  );
+                })}
+
+                {/* 新規選手追加カード */}
+                <div
+                  className="player-card add-player-card"
+                  onClick={handleAddNewPlayer}
+                  style={{
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    minHeight: '300px',
+                    backgroundColor: '#f8f9fa',
+                    border: '2px dashed #00bcd4',
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#e3f2fd';
+                    e.currentTarget.style.transform = 'scale(1.02)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f8f9fa';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                >
+                  <div style={{
+                    width: '80px',
+                    height: '80px',
+                    borderRadius: '50%',
+                    backgroundColor: '#00bcd4',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                    boxShadow: '0 4px 6px rgba(0, 188, 212, 0.3)'
+                  }}>
+                    <span style={{
+                      fontSize: '48px',
+                      color: 'white',
+                      fontWeight: 'bold'
+                    }}>+</span>
                   </div>
-                );
-                
-              })
+                  <h3 style={{
+                    color: '#00bcd4',
+                    fontSize: '20px',
+                    fontWeight: 'bold',
+                    margin: 0
+                  }}>
+                    {t("home.newPlayer")}
+                  </h3>
+                </div>
+              </>
             ) : (
               <p>{t("home.noPlayers")}</p>
             )}
