@@ -22,6 +22,7 @@
   "home.deleteConfirmTitle": "Delete Player?",
   "home.deleteConfirmMessage2": " ",
   "home.deleteConfirmMessage": "Player",
+  "home.deletePlayer": "Delete",
   "home.cancel": "Cancel",
   "home.delete": "Delete",
   "home.maxSpeed": "Max Speed/Recent Speed",
