@@ -385,7 +385,7 @@ export default function Home() {
                         style={{
                           background: 'none',
                           border: 'none',
-                          color: '#f44336',
+                          color: '#000000ff',
                           fontSize: '20px',
                           cursor: 'pointer',
                           padding: '4px 8px',
@@ -393,7 +393,7 @@ export default function Home() {
                         }}
                         title={t("home.deletePlayer") }
                       >
-                        🗑️
+                        ×
                       </button>
                     </div>
                     <div className="player-card-body">
