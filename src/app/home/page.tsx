@@ -14,7 +14,6 @@ import { Player } from "@/types";
 import { formatFirebaseDate } from "@/utils";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-// Playerタイプを拡張（得意球種と利き手、球速データを追加）
 interface ExtendedPlayer extends Player {
   throwingHand?: string;
   favoritePitch?: string;
@@ -39,24 +38,19 @@ export default function Home() {
     playerName: ""
   });
 
-  // 学年から数字のみを抽出する関数
   const normalizeGrade = (grade: string) => {
     if (!grade) return "";
-    
     const numericGrade = grade.replace(/[^\d]/g, '');
-    
     if (!numericGrade) return grade;
     return numericGrade; 
   };
 
-  // コンディションオプション
   const conditionOptions = [
     { value: "healthy", labelKey: "home.healthy", color: "#4CAF50", icon: "✓" },
     { value: "injured", labelKey: "home.injured", color: "#F44336", icon: "⚠" },
     { value: "sick", labelKey: "home.sick", color: "#FF9800", icon: "⚠" }
   ];
 
-  // Helper function to find field value with multiple possible key names
   const findFieldValue = (record: any, ...possibleKeys: string[]): any => {
     for (const key of possibleKeys) {
       if (record[key] !== undefined && record[key] !== null && record[key] !== "") {
@@ -66,7 +60,6 @@ export default function Home() {
     return null;
   };
 
-  // Fetch players from Firestore
   useEffect(() => {
     const fetchPlayers = async () => {
       try {
@@ -79,15 +72,12 @@ export default function Home() {
               ...playerDoc.data(),
             } as ExtendedPlayer;
 
-            // Fetch CSV data for this player to get speed statistics
             try {
               const csvDataRef = collection(db, "players", playerDoc.id, "csvData");
               const csvSnapshot = await getDocs(csvDataRef);
 
               if (!csvSnapshot.empty) {
                 const records = csvSnapshot.docs.map(doc => doc.data());
-
-                // Extract speeds from records
                 const speeds = records.map(r => {
                   const value = findFieldValue(
                     r,
@@ -108,7 +98,7 @@ export default function Home() {
 
                 if (speeds.length > 0) {
                   playerData.maxSpeed = Math.max(...speeds);
-                  playerData.recentSpeed = speeds[speeds.length - 1]; // Last recorded speed
+                  playerData.recentSpeed = speeds[speeds.length - 1];
                 }
               }
             } catch (error) {
@@ -120,15 +110,13 @@ export default function Home() {
         );
 
         const uniqueNames = Array.from(new Set(playerList.map((player) => player.name)));
-        
-        // 学年から数字のみを抽出して重複削除・ソート
         const uniqueGrades = Array.from(
           new Set(
             playerList
               .map((player) => normalizeGrade(player.grade))
-              .filter(grade => grade) // 空文字を除外
+              .filter(grade => grade)
           )
-        ).sort((a, b) => parseInt(a) - parseInt(b)); // 数値として昇順ソート
+        ).sort((a, b) => parseInt(a) - parseInt(b));
 
         setPlayers(playerList);
         setFilteredPlayers(playerList);
@@ -150,7 +138,6 @@ export default function Home() {
     }
 
     if (searchGrade) {
-      // 選手の学年を正規化して、選択された学年と比較
       filtered = filtered.filter((player) => normalizeGrade(player.grade) === searchGrade);
     }
 
@@ -175,7 +162,6 @@ export default function Home() {
 
   const handleNameInputChange = (input: string) => {
     setSearchName(input);
-
     if (input) {
       const suggestions = names.filter((name) =>
         name.toLowerCase().includes(input.toLowerCase())
@@ -203,13 +189,11 @@ export default function Home() {
     e.stopPropagation();
 
     try {
-      // Update Firestore
       const playerRef = doc(db, "players", playerId);
       await updateDoc(playerRef, {
         condition: condition as 'healthy' | 'injured' | 'sick'
       });
 
-      // Update local state
       setPlayers(prevPlayers =>
         prevPlayers.map(p =>
           p.id === playerId ? { ...p, condition: condition as 'healthy' | 'injured' | 'sick' } : p
@@ -225,25 +209,21 @@ export default function Home() {
     }
   };
 
-  // 削除確認ダイアログを表示
   const handleDeleteClick = (playerId: string, playerName: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setDeleteConfirm({ show: true, playerId, playerName });
   };
 
-  // 削除をキャンセル
   const handleCancelDelete = () => {
     setDeleteConfirm({ show: false, playerId: "", playerName: "" });
   };
 
-  // 選手を削除
   const handleConfirmDelete = async () => {
     const { playerId } = deleteConfirm;
     
     try {
       const player = players.find(p => p.id === playerId);
       
-      // プロフィール画像を削除
       if (player?.imageURL) {
         try {
           const imageRef = ref(storage, player.imageURL);
@@ -253,7 +233,6 @@ export default function Home() {
         }
       }
 
-      // サブコレクション（csvData）を削除
       try {
         const csvDataRef = collection(db, "players", playerId, "csvData");
         const csvSnapshot = await getDocs(csvDataRef);
@@ -263,19 +242,16 @@ export default function Home() {
         console.error("Error deleting subcollection:", error);
       }
 
-      // プレイヤードキュメントを削除
       const playerRef = doc(db, "players", playerId);
       await deleteDoc(playerRef);
 
-      // ローカルステートから削除
       setPlayers(prevPlayers => prevPlayers.filter(p => p.id !== playerId));
       setFilteredPlayers(prevPlayers => prevPlayers.filter(p => p.id !== playerId));
 
-      // 確認ダイアログを閉じる
       setDeleteConfirm({ show: false, playerId: "", playerName: "" });
     } catch (error) {
       console.error("Error deleting player:", error);
-      alert(t("home.deleteError") );
+      alert(t("home.deleteError") || "削除中にエラーが発生しました");
     }
   };
 
@@ -287,14 +263,12 @@ export default function Home() {
     return conditionOptions.find(opt => opt.value === condition) || conditionOptions[0];
   };
 
-  // 利き手の翻訳を取得
   const getThrowingHandLabel = (hand: string) => {
     if (hand === "right") return t("createPlayer.rightHanded");
     if (hand === "left") return t("createPlayer.leftHanded");
     return hand;
   };
 
-  // 得意球種の翻訳を取得
   const getFavoritePitchLabel = (pitch: string) => {
     const pitchMap: { [key: string]: string } = {
       fastball: t("createPlayer.fastball"),
@@ -314,7 +288,6 @@ export default function Home() {
 
       <div className="main-content">
         <div className="RightContenthome">
-          {/* Filters */}
           <div className="dropdown-container">
             <DatePicker
               selected={selectedDate}
@@ -364,56 +337,51 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Player Cards */}
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
-              filteredPlayers.map((player) => {
-                const currentCondition = getCondition(player);
-                const conditionInfo = getConditionInfo(currentCondition);
+              <>
+                {filteredPlayers.map((player) => {
+                  const currentCondition = getCondition(player);
+                  const conditionInfo = getConditionInfo(currentCondition);
 
-                return (
-                  <div
-                    key={player.id}
-                    className="player-card"
-                    onClick={() => handlePlayerClick(player.id)}
-                  >
-                    <div className="player-card-header">
-                      <span className="grade-badge">{normalizeGrade(player.grade)}{t("home1.grade")}</span>
-                      <button
-                        className="delete-button"
-                        onClick={(e) => handleDeleteClick(player.id, player.name, e)}
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#f44336',
-                          fontSize: '20px',
-                          cursor: 'pointer',
-                          padding: '4px 8px',
-                          marginLeft: 'auto'
-                        }}
-                        title={t("home.deletePlayer") }
-                      >
-                        🗑️
-                      </button>
-                    </div>
-                    <div className="player-card-body">
-                      {player.imageURL && (
-                        <Image
-                          src={player.imageURL}
-                          alt={`${player.name}'s profile`}
-                          className="player-photo-circle"
-                          width={60}
-                          height={60}
-                        />
-                      )}
-                      <h3 className="player-name">{player.name}</h3>
-                      <p className="player-stats">
-                        {t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}
-                      </p>
-                      <div className="player-details">
-                        <p>
-                          {t("home.maxSpeed")}: {player.maxSpeed ? `${player.maxSpeed.toFixed(1)}` : "-"}/
-                          {player.recentSpeed ? `${player.recentSpeed.toFixed(1)}` : "-"}[km/h]
+                  return (
+                    <div
+                      key={player.id}
+                      className="player-card"
+                      onClick={() => handlePlayerClick(player.id)}
+                    >
+                      <div className="player-card-header">
+                        <span className="grade-badge">{normalizeGrade(player.grade)}{t("home1.grade")}</span>
+                        <button
+                          className="delete-button"
+                          onClick={(e) => handleDeleteClick(player.id, player.name, e)}
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: '#f44336',
+                            fontSize: '20px',
+                            cursor: 'pointer',
+                            padding: '4px 8px',
+                            marginLeft: 'auto'
+                          }}
+                          title={t("home.deletePlayer") || "選手を削除"}
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                      <div className="player-card-body">
+                        {player.imageURL && (
+                          <Image
+                            src={player.imageURL}
+                            alt={`${player.name}'s profile`}
+                            className="player-photo-circle"
+                            width={60}
+                            height={60}
+                          />
+                        )}
+                        <h3 className="player-name">{player.name}</h3>
+                        <p className="player-stats">
+                          {t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}
                         </p>
                         <div className="player-details">
                           <p>
@@ -421,7 +389,6 @@ export default function Home() {
                             {player.recentSpeed ? `${player.recentSpeed.toFixed(1)}` : "-"}[km/h]
                           </p>
 
-                          {/* コンディション ドロップダウン */}
                           <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             {t("home.condition")}:
                             <select
@@ -479,7 +446,6 @@ export default function Home() {
                   );
                 })}
 
-                {/* 新規選手追加カード */}
                 <div
                   className="player-card add-player-card"
                   onClick={handleAddNewPlayer}
@@ -537,7 +503,6 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 削除確認モーダル */}
       {deleteConfirm.show && (
         <div style={{
           position: 'fixed',
@@ -560,10 +525,10 @@ export default function Home() {
             boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
           }}>
             <h3 style={{ marginBottom: '20px', color: '#333' }}>
-              {t("home.deleteConfirmTitle") }
+              {t("home.deleteConfirmTitle")}
             </h3>
             <p style={{ marginBottom: '30px', color: '#666' }}>
-              {t("home.deleteConfirmMessage") } <strong>{deleteConfirm.playerName}</strong> {t("home.deleteConfirmMessage2") }
+              {t("home.deleteConfirmMessage")} <strong>{deleteConfirm.playerName}</strong> {t("home.deleteConfirmMessage2")}
             </p>
             <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
               <button
@@ -577,7 +542,7 @@ export default function Home() {
                   fontSize: '14px'
                 }}
               >
-                {t("home.cancel") }
+                {t("home.cancel")}
               </button>
               <button
                 onClick={handleConfirmDelete}
