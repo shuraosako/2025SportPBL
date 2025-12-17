@@ -22,6 +22,7 @@
   "home.deleteConfirmTitle": "選手を削除しますか？",
   "home.deleteConfirmMessage": "選手",
   "home.deleteConfirmMessage2": "を削除します。この操作は取り消せません。",
+  "home.deletePlayer": "削除",
   "home.cancel": "キャンセル",
   "home.delete": "削除",
   "home.lastUpdate": "最終更新日",
