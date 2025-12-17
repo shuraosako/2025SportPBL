@@ -275,7 +275,7 @@ export default function Home() {
       setDeleteConfirm({ show: false, playerId: "", playerName: "" });
     } catch (error) {
       console.error("Error deleting player:", error);
-      alert(t("home.deleteError") || "削除中にエラーが発生しました");
+      alert(t("home.deleteError") );
     }
   };
 
@@ -367,49 +367,53 @@ export default function Home() {
           {/* Player Cards */}
           <div className="player-cards-container">
             {filteredPlayers.length > 0 ? (
-              <>
-                {filteredPlayers.map((player) => {
-                  const currentCondition = getCondition(player);
-                  const conditionInfo = getConditionInfo(currentCondition);
+              filteredPlayers.map((player) => {
+                const currentCondition = getCondition(player);
+                const conditionInfo = getConditionInfo(currentCondition);
 
-                  return (
-                    <div
-                      key={player.id}
-                      className="player-card"
-                      onClick={() => handlePlayerClick(player.id)}
-                    >
-                      <div className="player-card-header">
-                        <span className="grade-badge">{normalizeGrade(player.grade)}{t("home1.grade")}</span>
-                        <button
-                          className="delete-button"
-                          onClick={(e) => handleDeleteClick(player.id, player.name, e)}
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: '#f44336',
-                            fontSize: '20px',
-                            cursor: 'pointer',
-                            padding: '4px 8px',
-                            marginLeft: 'auto'
-                          }}
-                          title={t("home.deletePlayer") || "選手を削除"}
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                      <div className="player-card-body">
-                        {player.imageURL && (
-                          <Image
-                            src={player.imageURL}
-                            alt={`${player.name}'s profile`}
-                            className="player-photo-circle"
-                            width={60}
-                            height={60}
-                          />
-                        )}
-                        <h3 className="player-name">{player.name}</h3>
-                        <p className="player-stats">
-                          {t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}
+                return (
+                  <div
+                    key={player.id}
+                    className="player-card"
+                    onClick={() => handlePlayerClick(player.id)}
+                  >
+                    <div className="player-card-header">
+                      <span className="grade-badge">{normalizeGrade(player.grade)}{t("home1.grade")}</span>
+                      <button
+                        className="delete-button"
+                        onClick={(e) => handleDeleteClick(player.id, player.name, e)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#f44336',
+                          fontSize: '20px',
+                          cursor: 'pointer',
+                          padding: '4px 8px',
+                          marginLeft: 'auto'
+                        }}
+                        title={t("home.deletePlayer") }
+                      >
+                        🗑️
+                      </button>
+                    </div>
+                    <div className="player-card-body">
+                      {player.imageURL && (
+                        <Image
+                          src={player.imageURL}
+                          alt={`${player.name}'s profile`}
+                          className="player-photo-circle"
+                          width={60}
+                          height={60}
+                        />
+                      )}
+                      <h3 className="player-name">{player.name}</h3>
+                      <p className="player-stats">
+                        {t("home.height")}: {player.height}{t("common.cm")} {t("home.weight")}: {player.weight}{t("common.kg")}
+                      </p>
+                      <div className="player-details">
+                        <p>
+                          {t("home.maxSpeed")}: {player.maxSpeed ? `${player.maxSpeed.toFixed(1)}` : "-"}/
+                          {player.recentSpeed ? `${player.recentSpeed.toFixed(1)}` : "-"}[km/h]
                         </p>
                         <div className="player-details">
                           <p>
