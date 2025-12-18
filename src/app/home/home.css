@@ -4,10 +4,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 0 20px;
-
   margin: 0;
   box-sizing: border-box;
-  
 }
 
 .logo {
@@ -27,7 +25,7 @@
   display: flex;
   gap: 20px;
   align-items: center;
-  justify-content: flex-end; /* Align the profile box and hamburger icon to the right */
+  justify-content: flex-end;
   padding-right: 20px;
 }
 
@@ -39,7 +37,6 @@
   border-bottom: 1px solid #ccc;
 }
 
-/* Player Cards Section */
 /* Player Cards Section */
 .player-cards-container {
   display: grid;
@@ -168,7 +165,7 @@
 .profile-info {
   display: flex;
   align-items: center;
-  gap: 10px; /* Space between image and username */
+  gap: 10px;
 }
 
 .profile-container {
@@ -199,6 +196,7 @@
   border-radius: 5px;
   z-index: 10;
 }
+
 .profile-popup button {
   padding: 8px 16px;
   background-color: #4CAF50;
@@ -262,37 +260,172 @@
   display: flex;
   justify-content: left;
   align-items: center;
+  margin-top: 30px;
   margin-bottom: 20px;
+  gap: 10px;
 }
 
 .dropdown-item {
   flex: 1;
   max-width: 120px;
-  padding: 5px;
+  padding: 10px 14px;
   font-size: 14px;
   box-sizing: border-box;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.filter_button{
-  padding: 5px;
-  border-radius: 12px;
-  background-color: white;
-  text-align: center;
+.dropdown-item:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+}
+
+.dropdown-item:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* 改善されたフィルターボタン */
+.filter_button {
   margin: 4px 8px;
 }
-.new_player{
-  padding: 5px;
-  border-radius: 12px;
-  background-color: white;
-  text-align: center;
+
+.filter_button button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.filter_button button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.filter_button button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+}
+
+/* 改善された新規選手ボタン */
+.new_player {
   margin: 4px 4px;
 }
 
-.search-input {
-  margin-bottom: 10px;
-  padding: 6px;
-  width: 100%;
+.new_player button {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
   font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(245, 87, 108, 0.3);
+  letter-spacing: 0.5px;
+  position: relative;
+  overflow: hidden;
+}
+
+.new_player button::before {
+  content: '+ ';
+  font-size: 18px;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.new_player button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(245, 87, 108, 0.4);
+  background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+}
+
+.new_player button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(245, 87, 108, 0.3);
+}
+
+/* 名前検索用のオートコンプリート */
+.name-autocomplete {
+  position: relative;
+  flex: 1;
+  max-width: 120px;
+}
+
+.name-autocomplete input {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  box-sizing: border-box;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.name-autocomplete input:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+}
+
+.name-autocomplete input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 2px solid #667eea;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.suggestions li {
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  font-size: 14px;
+  color: #333;
+}
+
+.suggestions li:hover {
+  background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+}
+
+.suggestions li:last-child {
+  border-radius: 0 0 6px 6px;
 }
 
 .header-right a {
@@ -339,6 +472,12 @@
   .RightContent {
     padding: 20px;
   }
+
+  .filter_button button,
+  .new_player button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
 }
 
 /* Smaller screens - Mobile */
@@ -358,5 +497,19 @@
 
   .hamburger {
     font-size: 28px;
+  }
+
+  .dropdown-container {
+    flex-wrap: wrap;
+  }
+
+  .filter_button,
+  .new_player {
+    width: 100%;
+  }
+
+  .filter_button button,
+  .new_player button {
+    width: 100%;
   }
 }
