@@ -88,7 +88,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
     if (newPassword || confirmPassword) {
       if (newPassword !== confirmPassword) {
-        showMessage("error", "パスワードが一致しません");
+        showMessage("error", t("profile.errorPasswordMismatch"));
         return;
       }
     }
@@ -119,10 +119,10 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
       await updateDoc(doc(db, "users", user.uid), updates);
 
-      showMessage("success", "プロフィールを更新しました！");
+      showMessage("success", t("profile.successProfileUpdated"));
     } catch (err) {
       console.error(err);
-      showMessage("error", "更新に失敗しました");
+      showMessage("error", t("profile.errorUpdateFailed"));
     } finally {
       setIsLoading(false);
     }
@@ -131,14 +131,14 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
   // チームコード参加
   const handleJoinTeam = async () => {
     if (!teamCode || !user) {
-      showMessage("error", "チームコードを入力してください");
+      showMessage("error", t("profile.errorTeamCodeRequired"));
       return;
     }
     try {
       await updateDoc(doc(db, "users", user.uid), { teamCode });
-      showMessage("success", "チームに参加しました！");
+      showMessage("success", t("profile.successTeamJoined"));
     } catch {
-      showMessage("error", "チーム参加に失敗しました");
+      showMessage("error", t("profile.errorTeamJoinFailed"));
     }
   };
 
@@ -148,7 +148,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
       await signOut(auth);
       router.push("/login");
     } catch {
-      showMessage("error", "ログアウトに失敗しました");
+      showMessage("error", t("profile.errorLogoutFailed"));
     }
   };
 
@@ -170,7 +170,7 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
 
       router.push("/");
     } catch {
-      showMessage("error", "削除に失敗しました。再ログインが必要です");
+      showMessage("error", t("profile.errorDeleteAccountFailed"));
     }
   };
 
@@ -191,17 +191,29 @@ export default function ProfilePage({ params }: { params: { uid: string } }) {
           {/* 左サイド */}
           <div className="profile-sidebar">
             <div className="profile-image-card">
-              {previewImage ? (
-                <img src={previewImage} className="profile-avatar" />
-              ) : currentImageURL ? (
-                <img src={currentImageURL} className="profile-avatar" />
-              ) : (
-                <div className="profile-avatar-placeholder">👤</div>
-              )}
-
-              <label className="upload-button">{t("profile.uploadPhoto")}
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="file-input-hidden" />
-              </label>
+              <div className="profile-image-wrapper">
+                {currentImageURL ?(
+                  <Image
+                    src={currentImageURL}
+                    alt="Profile"
+                    className="profile-avatar"
+                    width={200}
+                    height={200}
+                  />
+                ) : (
+                  <div className="profile-avatar-placeholder">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="placeholder-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    </svg>
+                  </div>
+                )}
+                <div className="image-hover-overlay">
+                  <label className="image-hover-label">
+                    {t("profile.changePhoto")}
+                    <input type="file" accept="image/*" onChange={handleImageUpload} className="file-input-hidden" />
+                  </label>
+                </div>
+              </div>
 
               <h3 className="profile-username">{newUsername}</h3>
             </div>
