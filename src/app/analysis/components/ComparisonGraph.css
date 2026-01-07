@@ -80,3 +80,22 @@
   font-size: 18px;
   font-weight: bold;
 }
+
+.radar-player-filters {
+  display: flex;
+  gap: 20px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.radar-player-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox-label {
+  font-weight: 600;
+  font-size: 14px;
+}
