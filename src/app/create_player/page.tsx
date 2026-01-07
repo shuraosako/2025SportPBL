@@ -23,13 +23,11 @@ export default function Homepage() {
   const [image, setImage] = useState<File | null>(null);
   const [imageURL, setImageURL] = useState<string | null>(null);
 
-  // Handle image file selection
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const file = event.target.files[0];
       setImage(file);
 
-      // Preview image
       const reader = new FileReader();
       reader.onload = () => {
         setImageURL(reader.result as string);
@@ -49,14 +47,12 @@ export default function Homepage() {
     try {
       let imageDownloadURL = "";
 
-      // Upload image to Firebase Storage
       if (image) {
         const imageRef = ref(storage, `player-images/${image.name}`);
         await uploadBytes(imageRef, image);
         imageDownloadURL = await getDownloadURL(imageRef);
       }
 
-      // Add player data to Firestore
       await addDoc(collection(db, "players"), {
         name: playerName,
         grade: grade,
@@ -69,7 +65,6 @@ export default function Homepage() {
         condition: 'healthy'
       });
 
-      // Clear form fields and image preview
       setPlayerName("");
       setGrade("");
       setHeight("");
@@ -103,7 +98,7 @@ export default function Homepage() {
           )}
 
           <form onSubmit={handleAddPlayer}>
-            <label>{t("createPlayer.name")}:</label>
+          <label>{t("createPlayer.name")}:</label>
             <input
               type="text"
               value={playerName}
@@ -119,52 +114,71 @@ export default function Homepage() {
               required
             />
 
-            <label>{t("createPlayer.height")}:</label>
-            <input
-              type="number"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-              required
-            />
+            <div className="form-row">
+              <div>
+                <label>{t("createPlayer.height")}:</label>
+                <input
+                  type="number"
+                  value={height}
+                  onChange={(e) => setHeight(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label>{t("createPlayer.weight")}:</label>
+                <input
+                  type="number"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
 
-            <label>{t("createPlayer.weight")}:</label>
-            <input
-              type="number"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              required
-            />
-
-            <label>{t("createPlayer.throwingHand")}:</label>
-            <select
-              value={throwingHand}
-              onChange={(e) => setThrowingHand(e.target.value)}
-              required
-            >
-              <option value="">{t("createPlayer.selectThrowingHand")}</option>
-              <option value="right">{t("createPlayer.rightHanded")}</option>
-              <option value="left">{t("createPlayer.leftHanded")}</option>
-            </select>
-
-            <label>{t("createPlayer.favoritePitch")}:</label>
-            <select
-              value={favoritePitch}
-              onChange={(e) => setFavoritePitch(e.target.value)}
-              required
-            >
-              <option value="">{t("createPlayer.selectFavoritePitch")}</option>
-              <option value="fastball">{t("createPlayer.fastball")}</option>
-              <option value="curveball">{t("createPlayer.curveball")}</option>
-              <option value="slider">{t("createPlayer.slider")}</option>
-              <option value="changeup">{t("createPlayer.changeup")}</option>
-              <option value="splitter">{t("createPlayer.splitter")}</option>
-              <option value="forkball">{t("createPlayer.forkball")}</option>
-              <option value="cutter">{t("createPlayer.cutter")}</option>
-            </select>
+            <div className="form-row">
+              <div>
+                <label>{t("createPlayer.throwingHand")}:</label>
+                <select
+                  value={throwingHand}
+                  onChange={(e) => setThrowingHand(e.target.value)}
+                  required
+                >
+                  <option value="">{t("createPlayer.selectThrowingHand")}</option>
+                  <option value="right">{t("createPlayer.rightHanded")}</option>
+                  <option value="left">{t("createPlayer.leftHanded")}</option>
+                </select>
+              </div>
+              <div>
+                <label>{t("createPlayer.favoritePitch")}:</label>
+                <select
+                  value={favoritePitch}
+                  onChange={(e) => setFavoritePitch(e.target.value)}
+                  required
+                >
+                  <option value="">{t("createPlayer.selectFavoritePitch")}</option>
+                  <option value="fastball">{t("createPlayer.fastball")}</option>
+                  <option value="curveball">{t("createPlayer.curveball")}</option>
+                  <option value="slider">{t("createPlayer.slider")}</option>
+                  <option value="changeup">{t("createPlayer.changeup")}</option>
+                  <option value="splitter">{t("createPlayer.splitter")}</option>
+                  <option value="forkball">{t("createPlayer.forkball")}</option>
+                  <option value="cutter">{t("createPlayer.cutter")}</option>
+                </select>
+              </div>
+            </div>
 
             {/* Image Upload */}
             <label>{t("createPlayer.photo")}:</label>
-            <input type="file" accept="image/*" onChange={handleImageChange} required />
+            <input 
+              type="file" 
+              id="file-upload"
+              accept="image/*" 
+              onChange={handleImageChange} 
+              required 
+            />
+            <label htmlFor="file-upload">
+              {image ? image.name : t("createPlayer.photo")}
+            </label>
 
             <button type="submit">{t("createPlayer.submit")}</button>
           </form>
