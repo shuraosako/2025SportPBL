@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import { useLanguage } from "@/contexts/LanguageContext";
 import { PlayerData, Player } from "../types";
@@ -19,6 +20,11 @@ export default function ComparisonGraph({
   selectedPlayers,
 }: ComparisonGraphProps) {
   const { t } = useLanguage();
+  const [radarSelectedPlayers, setRadarSelectedPlayers] = React.useState<string[]>(selectedPlayers);
+
+  React.useEffect(() => {
+    setRadarSelectedPlayers(selectedPlayers);
+  }, [selectedPlayers]);
 
   if (selectedPlayers.length === 0) {
     return (
@@ -75,7 +81,7 @@ export default function ComparisonGraph({
   };
 
   const prepareRadarData = () => {
-    const allStats = playerData.filter(d => selectedPlayers.includes(d.id));
+    const allStats = playerData.filter(d => radarSelectedPlayers.includes(d.id));
     const maxValues = {
       speed: Math.max(...allStats.map(d => d.speed), 1),
       spin: Math.max(...allStats.map(d => d.spin), 1),
@@ -93,7 +99,7 @@ export default function ComparisonGraph({
     return metrics.map(metric => {
       const dataPoint: any = { subject: metric.label };
       
-      selectedPlayers.slice(0, 5).forEach(playerId => {
+      radarSelectedPlayers.slice(0, 5).forEach(playerId => {
         const stats = playerData.filter(data => data.id === playerId);
         if (stats.length > 0) {
           let value = 0;
@@ -120,6 +126,14 @@ export default function ComparisonGraph({
       
       return dataPoint;
     });
+  };
+
+  const toggleRadarPlayer = (playerId: string) => {
+    setRadarSelectedPlayers(prev => 
+      prev.includes(playerId) 
+        ? prev.filter(id => id !== playerId)
+        : [...prev, playerId]
+    );
   };
 
   return (
@@ -205,6 +219,29 @@ export default function ComparisonGraph({
         <h4 className="radar-chart-title">
           {t("analysis.performanceRadar")}
         </h4>
+        
+        {/* Player Filter Checkboxes */}
+        <div className="radar-player-filters">
+          {selectedPlayers.slice(0, 5).map((playerId, index) => {
+            const player = players.find(p => p.id === playerId);
+            return (
+              <label key={playerId} className="radar-player-checkbox">
+                <input
+                  type="checkbox"
+                  checked={radarSelectedPlayers.includes(playerId)}
+                  onChange={() => toggleRadarPlayer(playerId)}
+                />
+                <span 
+                  className="checkbox-label"
+                  style={{ color: COLORS[index] }}
+                >
+                  {player?.name}
+                </span>
+              </label>
+            );
+          })}
+        </div>
+
         <ResponsiveContainer width="100%" height={500}>
           <RadarChart data={prepareRadarData()}>
             <PolarGrid stroke="#e0e0e0" />
@@ -223,18 +260,19 @@ export default function ComparisonGraph({
                 return [`${value}`, player?.name || name];
               }}
             />
-            {selectedPlayers.slice(0, 5).map((playerId, index) => {
+            {radarSelectedPlayers.slice(0, 5).map((playerId) => {
               const player = players.find(p => p.id === playerId);
+              const originalIndex = selectedPlayers.indexOf(playerId);
               return (
                 <Radar
                   key={playerId}
                   name={player?.name || "Unknown"}
                   dataKey={playerId}
-                  stroke={COLORS[index]}
-                  fill={COLORS[index]}
+                  stroke={COLORS[originalIndex]}
+                  fill={COLORS[originalIndex]}
                   fillOpacity={0.3}
                   strokeWidth={2}
-                  dot={{ r: 4, fill: COLORS[index], strokeWidth: 2 }}
+                  dot={{ r: 4, fill: COLORS[originalIndex], strokeWidth: 2 }}
                   activeDot={{ r: 6, strokeWidth: 2 }}
                 />
               );
